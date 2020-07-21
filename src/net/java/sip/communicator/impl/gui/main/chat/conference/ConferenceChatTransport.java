@@ -151,10 +151,22 @@ public class ConferenceChatTransport
         Object tnOpSet = chatRoom.getParentProvider()
             .getOperationSet(OperationSetTypingNotifications.class);
 
-        if (tnOpSet != null)
-            return true;
-        else
-            return false;
+        return tnOpSet != null;
+    }
+
+    /**
+     * Returns <code>true</code> if this chat transport supports file transfer,
+     * otherwise returns <code>false</code>.
+     *
+     * @return <code>true</code> if this chat transport supports file transfer,
+     * otherwise returns <code>false</code>.
+     */
+    public boolean allowsFileTransfer()
+    {
+        Object ftOpSet = getProtocolProvider()
+            .getOperationSet(OperationSetFileTransfer.class);
+
+        return ftOpSet != null;
     }
 
     /**
@@ -246,13 +258,23 @@ public class ConferenceChatTransport
         return null;
     }
 
+    @Override
+    public void sendFileViaHttpUpload(File file) throws Exception {
+        OperationSetHttpUploadFileTransfer httpFtOpSet = getProtocolProvider()
+            .getOperationSet(OperationSetHttpUploadFileTransfer.class);
+
+        httpFtOpSet.sendFile(chatRoom, file);
+    }
+
     /**
      * Returns the maximum file length supported by the protocol in bytes.
      * @return the file length that is supported.
      */
     public long getMaximumFileLength()
     {
-        return -1;
+        OperationSetHttpUploadFileTransfer muFtOpSet = getProtocolProvider()
+            .getOperationSet(OperationSetHttpUploadFileTransfer.class);
+        return muFtOpSet.getMaximumFileLength();
     }
 
     /**

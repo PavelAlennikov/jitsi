@@ -81,14 +81,7 @@ public class OperationSetFileTransferJabberImpl
     static
     {
         XMPPConnectionRegistry.addConnectionCreationListener(
-            new ConnectionCreationListener()
-        {
-            @Override
-            public void connectionCreated(XMPPConnection connection)
-            {
-                FileTransferNegotiator.getInstanceFor(connection);
-            }
-        });
+            FileTransferNegotiator::getInstanceFor);
     }
 
     /**
@@ -383,7 +376,7 @@ public class OperationSetFileTransferJabberImpl
 
         /**
          * Listens for file transfer packets.
-         * @param packet packet to be processed
+         * @param request to be processed
          */
         @Override
         public void fileTransferRequest(final FileTransferRequest request)

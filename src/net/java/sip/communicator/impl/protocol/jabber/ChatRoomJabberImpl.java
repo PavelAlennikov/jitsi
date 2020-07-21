@@ -2247,7 +2247,7 @@ public class ChatRoomJabberImpl
         {
             Date timeStamp;
             DelayInformation delay =
-                    msg.getExtension("x", "jabber:x:delay");
+                    msg.getExtension("delay", "urn:xmpp:delay");
 
             if(delay != null)
             {

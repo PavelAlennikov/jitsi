@@ -59,6 +59,7 @@ import org.jivesoftware.smack.tcp.*;
 import org.jivesoftware.smack.util.*;
 import org.jivesoftware.smack.roster.*;
 import org.jivesoftware.smackx.disco.packet.*;
+import org.jivesoftware.smackx.httpfileupload.HttpFileUploadManager;
 import org.jivesoftware.smackx.message_correct.element.*;
 import org.jivesoftware.smackx.nick.packet.*;
 import org.jivesoftware.smackx.ping.*;
@@ -1737,6 +1738,10 @@ public class ProtocolProviderServiceJabberImpl
                 OperationSetJitsiMeetTools.class,
                 new OperationSetJitsiMeetToolsJabberImpl(this));
 
+//            TODO:if (isHttpUploadEnabled) {
+            addSupportedOperationSet(OperationSetHttpUploadFileTransfer.class,
+                                     new OperationSetHttpUploadFileTransferJabberImpl(this));
+
             if(isServerStoredInfoEnabled)
             {
                 addSupportedOperationSet(
@@ -3158,5 +3163,17 @@ public class ProtocolProviderServiceJabberImpl
         final Socket socket = getSocket();
 
         return (socket instanceof SSLSocket) ? (SSLSocket) socket : null;
+    }
+
+    public HttpFileUploadManager getHttpFileUploadManager() throws GeneralSecurityException {
+        HttpFileUploadManager httpFileUploadManager = HttpFileUploadManager.getInstanceFor(getConnection());
+
+        CertificateService cvs = getCertificateVerificationService();
+
+        SSLContext sslContext = cvs.getSSLContext(getTrustManager(cvs, getConnection().getServiceName().toString()));
+        httpFileUploadManager.setTlsContext(sslContext);
+
+        HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
+        return httpFileUploadManager;
     }
 }

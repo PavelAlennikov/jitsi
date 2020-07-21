@@ -247,6 +247,11 @@ public class AdHocConferenceChatTransport
         return null;
     }
 
+    @Override
+    public void sendFileViaHttpUpload(File file) throws Exception {
+        //Not supported yet
+    }
+
     /**
      * Invites the given contact in this chat conference.
      *

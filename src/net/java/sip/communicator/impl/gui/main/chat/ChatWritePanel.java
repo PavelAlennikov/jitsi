@@ -19,11 +19,17 @@ package net.java.sip.communicator.impl.gui.main.chat;
 
 import java.awt.*;
 import java.awt.Container;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.Timer;
 import javax.swing.event.*;
@@ -37,6 +43,7 @@ import net.java.sip.communicator.impl.gui.main.chat.conference.*;
 import net.java.sip.communicator.impl.gui.main.chat.menus.*;
 import net.java.sip.communicator.impl.gui.utils.*;
 import net.java.sip.communicator.plugin.desktoputil.*;
+import net.java.sip.communicator.plugin.desktoputil.SwingWorker;
 import net.java.sip.communicator.service.contactlist.*;
 import net.java.sip.communicator.service.contactsource.*;
 import net.java.sip.communicator.service.gui.*;
@@ -807,6 +814,54 @@ public class ChatWritePanel
                 {
                     chatPanel.stopMessageCorrection();
                 }
+            }
+        }
+        else if (e.getKeyCode() == KeyEvent.VK_V) {
+            int i = e.getModifiers();
+            if ((i & InputEvent.CTRL_MASK) == InputEvent.CTRL_MASK) {
+                sendPasteImage(e);
+            }
+        }
+    }
+
+    private void sendPasteImage(KeyEvent e)
+    {
+        Clipboard clb = Toolkit.getDefaultToolkit().getSystemClipboard();
+        Transferable contents = clb.getContents(e.getSource());
+        if (contents != null && contents.isDataFlavorSupported(DataFlavor.imageFlavor))
+        {
+            try
+            {
+                BufferedImage transferData = (BufferedImage) contents.getTransferData(DataFlavor.imageFlavor);
+                String imageName = "im_" + RandomStringUtils.randomAlphanumeric(5);
+                File tempFile = File.createTempFile(imageName, ".png");
+                SwingWorker writeImageThread = new SwingWorker()
+                {
+                    @Override
+                    public Object construct()
+                    {
+                        try
+                        {
+                            ImageIO.write(transferData, "png", tempFile);
+                        }
+                        catch (IOException ioException)
+                        {
+                            logger.error(ioException);
+                        }
+                            return true;
+                    }
+
+                    @Override
+                    public void finished()
+                    {
+                        chatPanel.sendFile(tempFile);
+                    }
+                };
+                writeImageThread.start();
+            }
+            catch (UnsupportedFlavorException | IOException unsupportedFlavorException)
+            {
+                logger.error(e);
             }
         }
     }

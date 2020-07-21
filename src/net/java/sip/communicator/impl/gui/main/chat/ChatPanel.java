@@ -1542,6 +1542,66 @@ public class ChatPanel
         worker.start();
     }
 
+    private void sendFileNoComponent(File file) {
+        final ChatTransport sendFileTransport
+            = this.findHttpUploadFileTransferChatTransport();
+
+        this.setSelectedChatTransport(sendFileTransport, true);
+
+        if(file.length() > sendFileTransport.getMaximumFileLength())
+        {
+            addMessage(
+                chatSession.getCurrentChatTransport().getName(),
+                new Date(),
+                Chat.ERROR_MESSAGE,
+                GuiActivator.getResources()
+                    .getI18NString("service.gui.FILE_TOO_BIG",
+                                   new String[]{
+                                       sendFileTransport.getMaximumFileLength()/1024/1024
+                                           + " MB"}),
+                "",
+                "text");
+
+            return;
+        }
+
+        SwingWorker worker = new SwingWorker()
+        {
+            @Override
+            public Object construct()
+                throws Exception
+            {
+                sendFileTransport.sendFileViaHttpUpload(file);
+
+                return "";
+            }
+
+            @Override
+            public void catchException(Throwable ex)
+            {
+                logger.error("Failed to send file.", ex);
+
+                if (ex instanceof IllegalStateException)
+                {
+                    addErrorMessage(
+                        chatSession.getCurrentChatTransport().getName(),
+                        GuiActivator.getResources().getI18NString(
+                            "service.gui.MSG_SEND_CONNECTION_PROBLEM"));
+                }
+                else
+                {
+                    addErrorMessage(
+                        chatSession.getCurrentChatTransport().getName(),
+                        GuiActivator.getResources().getI18NString(
+                            "service.gui.MSG_DELIVERY_ERROR",
+                            new String[]{ex.getMessage()}));
+                }
+            }
+        };
+
+        worker.start();
+    }
+
     /**
      * Sends the given file through the currently selected chat transport.
      *
@@ -1553,13 +1613,14 @@ public class ChatPanel
         // dispatch thread.
         if (!SwingUtilities.isEventDispatchThread())
         {
-            SwingUtilities.invokeLater(new Runnable()
-            {
-                public void run()
-                {
-                    sendFile(file);
-                }
-            });
+            SwingUtilities.invokeLater(() -> sendFile(file));
+            return;
+        }
+
+        final ChatTransport httpUploadFileTransferTransport = findHttpUploadFileTransferChatTransport();
+
+        if (httpUploadFileTransferTransport != null) {
+            sendFileNoComponent(file);
             return;
         }
 
@@ -2121,13 +2182,7 @@ public class ChatPanel
     {
         if(!SwingUtilities.isEventDispatchThread())
         {
-            SwingUtilities.invokeLater(new Runnable()
-            {
-                public void run()
-                {
-                    updateChatTransportStatus(chatTransport);
-                }
-            });
+            SwingUtilities.invokeLater(() -> updateChatTransportStatus(chatTransport));
             return;
         }
 
@@ -2360,13 +2415,7 @@ public class ChatPanel
     {
         if(!SwingUtilities.isEventDispatchThread())
         {
-            SwingUtilities.invokeLater(new Runnable()
-            {
-                public void run()
-                {
-                    updateChatContactStatus(chatContact, statusMessage);
-                }
-            });
+            SwingUtilities.invokeLater(() -> updateChatContactStatus(chatContact, statusMessage));
             return;
         }
 
@@ -2386,14 +2435,7 @@ public class ChatPanel
     {
         if(!SwingUtilities.isEventDispatchThread())
         {
-            SwingUtilities.invokeLater(new Runnable()
-            {
-                @Override
-                public void run()
-                {
-                    setChatSubject(subject);
-                }
-            });
+            SwingUtilities.invokeLater(() -> setChatSubject(subject));
 
             return;
         }
@@ -2440,14 +2482,8 @@ public class ChatPanel
     {
         if(!SwingUtilities.isEventDispatchThread())
         {
-            SwingUtilities.invokeLater(new Runnable()
-            {
-                public void run()
-                {
-                    addIncomingFileTransferRequest(
-                        fileTransferOpSet, request, date);
-                }
-            });
+            SwingUtilities.invokeLater(() -> addIncomingFileTransferRequest(
+                fileTransferOpSet, request, date));
             return;
         }
 
@@ -2506,15 +2542,19 @@ public class ChatPanel
      */
     public ChatTransport findFileTransferChatTransport()
     {
-        // We currently don't support file transfer in group chats.
-        if (chatSession instanceof ConferenceChatSession)
-            return null;
+        return findTransportForOperationSet(OperationSetFileTransfer.class);
+    }
 
+    public ChatTransport findHttpUploadFileTransferChatTransport() {
+        return findTransportForOperationSet(OperationSetHttpUploadFileTransfer.class);
+    }
+
+    private ChatTransport findTransportForOperationSet(Class<? extends OperationSet> operationSet) {
         ChatTransport currentChatTransport
             = chatSession.getCurrentChatTransport();
 
         if (currentChatTransport.getProtocolProvider()
-                .getOperationSet(OperationSetFileTransfer.class) != null)
+            .getOperationSet(operationSet) != null)
         {
             return currentChatTransport;
         }
@@ -2529,7 +2569,7 @@ public class ChatPanel
 
                 Object fileTransferOpSet
                     = chatTransport.getProtocolProvider()
-                        .getOperationSet(OperationSetFileTransfer.class);
+                    .getOperationSet(operationSet);
 
                 if (fileTransferOpSet != null)
                     return chatTransport;

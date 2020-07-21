@@ -341,10 +341,7 @@ public class MetaContactChatTransport
         Object ftOpSet = contact.getProtocolProvider()
             .getOperationSet(OperationSetFileTransfer.class);
 
-        if (ftOpSet != null)
-            return true;
-        else
-            return false;
+        return ftOpSet != null;
     }
 
     /**
@@ -565,6 +562,14 @@ public class MetaContactChatTransport
         return sendFile(file, false);
     }
 
+    @Override
+    public void sendFileViaHttpUpload(File file) throws Exception {
+        OperationSetHttpUploadFileTransfer httpFtOpSet = getProtocolProvider()
+            .getOperationSet(OperationSetHttpUploadFileTransfer.class);
+
+        httpFtOpSet.sendFile(contact, file);
+    }
+
     /**
      * Sends the given file through this chat transport file transfer operation
      * set.
@@ -580,12 +585,12 @@ public class MetaContactChatTransport
         if (!allowsFileTransfer())
             return null;
 
+        ProtocolProviderService protocolProvider = contact.getProtocolProvider();
         if (FileUtils.isImage(file.getName()))
         {
             // Create a thumbnailed file if possible.
             OperationSetThumbnailedFileFactory tfOpSet
-                = contact
-                    .getProtocolProvider()
+                = protocolProvider
                         .getOperationSet(
                             OperationSetThumbnailedFileFactory.class);
 
@@ -604,7 +609,7 @@ public class MetaContactChatTransport
 
         if(isMultimediaMessage)
         {
-            OperationSetSmsMessaging smsOpSet = contact.getProtocolProvider()
+            OperationSetSmsMessaging smsOpSet = protocolProvider
                 .getOperationSet(OperationSetSmsMessaging.class);
 
             if(smsOpSet == null)
@@ -614,7 +619,7 @@ public class MetaContactChatTransport
         }
         else
         {
-            OperationSetFileTransfer ftOpSet = contact.getProtocolProvider()
+            OperationSetFileTransfer ftOpSet = protocolProvider
                 .getOperationSet(OperationSetFileTransfer.class);
             return ftOpSet.sendFile(contact, file);
         }

@@ -1678,6 +1678,9 @@ public class ProtocolProviderServiceJabberImpl
                 OperationSetJitsiMeetTools.class,
                 new OperationSetJitsiMeetToolsJabberImpl(this));
 
+            addSupportedOperationSet(OperationSetHttpUploadFileTransfer.class,
+                                     new OperationSetHttpUploadFileTransferJabberImpl(this));
+
             addSupportedOperationSet(
                 OperationSetServerStoredContactInfo.class,
                 new OperationSetServerStoredContactInfoJabberImpl(
@@ -3016,5 +3019,17 @@ public class ProtocolProviderServiceJabberImpl
         final Socket socket = getSocket();
 
         return (socket instanceof SSLSocket) ? (SSLSocket) socket : null;
+    }
+
+    public HttpFileUploadManager getHttpFileUploadManager() throws GeneralSecurityException {
+        HttpFileUploadManager httpFileUploadManager = HttpFileUploadManager.getInstanceFor(getConnection());
+
+        CertificateService cvs = getCertificateVerificationService();
+
+        SSLContext sslContext = cvs.getSSLContext(getTrustManager(cvs, getConnection().getServiceName().toString()));
+        httpFileUploadManager.setTlsContext(sslContext);
+
+        HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
+        return httpFileUploadManager;
     }
 }

@@ -218,6 +218,8 @@ public interface ChatTransport
     public FileTransfer sendFile(File file)
         throws Exception;
 
+    public void sendFileViaHttpUpload(File file) throws Exception;
+
     /**
      * Returns the maximum file length supported by the protocol in bytes.
      * @return the file length that is supported.

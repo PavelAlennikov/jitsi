@@ -21,6 +21,7 @@ import net.java.sip.communicator.service.certificate.*;
 import net.java.sip.communicator.service.protocol.*;
 import net.java.sip.communicator.service.protocol.event.*;
 import org.jivesoftware.smack.*;
+import org.jivesoftware.smack.sasl.javax.*;
 import org.jxmpp.jid.*;
 
 import javax.net.ssl.*;
@@ -40,6 +41,20 @@ public class LoginByPasswordStrategy
     private ConnectionConfiguration.Builder ccBuilder;
 
     private String password;
+
+    /**
+     * SASLAuthentication currently supports only global mechanisms setting
+     * so per account property is not of much use, but will keep it for
+     * compatibility with old versions.
+     * We try to modify it only once or some concurrent modification exceptions
+     * can occur.
+     */
+    private static boolean saslMechanismsInitialized = false;
+
+    /**
+     * Used to lock the modifying mechanisms and any login that can occur.
+     */
+    private static final Object modifySASLMechanisms = new Object();
 
     /**
      * Create a login strategy that logs in using user credentials (username
@@ -95,8 +110,20 @@ public class LoginByPasswordStrategy
     public boolean login(AbstractXMPPConnection connection, EntityFullJid jid)
         throws XMPPException, InterruptedException, IOException, SmackException
     {
-        connection.login(
-            jid.getLocalpart(), password, jid.getResourceOrEmpty());
+        if (!saslMechanismsInitialized)
+        {
+            synchronized(modifySASLMechanisms)
+            {
+                if (!saslMechanismsInitialized)
+                {
+                    SASLAuthentication.unregisterSASLMechanism(SASLGSSAPIMechanism.class.getName());
+                    saslMechanismsInitialized = true;
+                }
+            }
+        }
+
+        connection.login(jid.getLocalpart(), password, jid.getResourceOrEmpty());
+
         return true;
     }
 

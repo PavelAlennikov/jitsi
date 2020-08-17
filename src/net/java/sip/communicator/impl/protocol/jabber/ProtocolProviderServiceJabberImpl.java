@@ -51,11 +51,13 @@ import org.jitsi.service.configuration.*;
 import org.jitsi.service.neomedia.*;
 import org.jitsi.util.*;
 import org.jivesoftware.smack.*;
+import org.jivesoftware.smack.XMPPException.XMPPErrorException;
 import org.jivesoftware.smack.packet.*;
 import org.jivesoftware.smack.provider.*;
 import org.jivesoftware.smack.util.*;
 import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.*;
+import org.jivesoftware.smackx.httpfileupload.HttpFileUploadManager;
 import org.jivesoftware.smackx.packet.*;
 import org.xmlpull.v1.*;
 import org.xmpp.jnodes.smack.*;
@@ -962,8 +964,8 @@ public class ProtocolProviderServiceJabberImpl
 
             //no need to check with a different username if the
             //socket could not be opened
-            if (ex.getWrappedThrowable() instanceof ConnectException
-                || ex.getWrappedThrowable() instanceof NoRouteToHostException)
+            if (ex.getCause() instanceof ConnectException
+                || ex.getCause() instanceof NoRouteToHostException)
             {
                 //as we got an exception not handled in connectAndLogin
                 //no state was set, so fire it here so we can continue
@@ -1211,14 +1213,14 @@ public class ProtocolProviderServiceJabberImpl
                 confConn.setCustomSSLContext(sslContext);
             }
             else if (tlsRequired)
-                throw new XMPPException(
+                throw new XMPPErrorException(
                     "Certificate verification service is "
                     + "unavailable and TLS is required");
         }
         catch(GeneralSecurityException e)
         {
             logger.error("Error creating custom trust manager", e);
-            throw new XMPPException("Error creating custom trust manager", e);
+            throw new XMPPErrorException("Error creating custom trust manager", e);
         }
 
         // FIXME rework debugger to work with Connection if possible
@@ -2198,7 +2200,7 @@ public class ProtocolProviderServiceJabberImpl
         RegistrationState regState = RegistrationState.UNREGISTERED;
         String reasonStr = null;
 
-        Throwable wrappedEx = ex.getWrappedThrowable();
+        Throwable wrappedEx = ex.getCause();
         if(wrappedEx != null
             && (wrappedEx instanceof UnknownHostException
                 || wrappedEx instanceof ConnectException
@@ -2310,7 +2312,7 @@ public class ProtocolProviderServiceJabberImpl
 
             if(exception instanceof XMPPException)
             {
-                StreamError err = ((XMPPException)exception).getStreamError();
+                StreamError err = ((XMPPErrorException)exception).get;
 
                 if(err != null && err.getCode().equals(
                     XMPPError.Condition.conflict.toString()))
@@ -3022,14 +3024,20 @@ public class ProtocolProviderServiceJabberImpl
     }
 
     public HttpFileUploadManager getHttpFileUploadManager() throws GeneralSecurityException {
-        HttpFileUploadManager httpFileUploadManager = HttpFileUploadManager.getInstanceFor(getConnection());
+        HttpFileUploadManager httpFileUploadManager = HttpFileUploadManager.getInstanceFor(
+            (XMPPConnection) getConnection());
 
         CertificateService cvs = getCertificateVerificationService();
 
         SSLContext sslContext = cvs.getSSLContext(getTrustManager(cvs, getConnection().getServiceName().toString()));
         httpFileUploadManager.setTlsContext(sslContext);
 
-        HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
+        HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
+            @Override
+            public boolean verify(String hostname, SSLSession session) {
+                return true;
+            }
+        });
         return httpFileUploadManager;
     }
 }

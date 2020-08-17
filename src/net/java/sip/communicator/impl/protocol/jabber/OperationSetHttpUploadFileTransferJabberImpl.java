@@ -13,8 +13,10 @@ import net.java.sip.communicator.service.protocol.OperationSetHttpUploadFileTran
 import net.java.sip.communicator.service.protocol.event.FileTransferListener;
 import net.java.sip.communicator.util.Logger;
 import org.jivesoftware.smack.SmackException;
+import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException.XMPPErrorException;
 import org.jivesoftware.smackx.httpfileupload.HttpFileUploadManager;
+import org.jivesoftware.smackx.httpfileupload.UploadProgressListener;
 import org.jivesoftware.smackx.httpfileupload.UploadService;
 
 public class OperationSetHttpUploadFileTransferJabberImpl
@@ -46,8 +48,11 @@ public class OperationSetHttpUploadFileTransferJabberImpl
         try {
             HttpFileUploadManager httpFileUploadManager = jabberProvider.getHttpFileUploadManager();
             httpFileUploadManager.discoverUploadService();
-            URL url = httpFileUploadManager.uploadFile(file, (uploadedBytes, totalBytes) -> {
-                //TODO: add listener here
+            URL url = httpFileUploadManager.uploadFile(file, new UploadProgressListener() {
+                @Override
+                public void onUploadProgress(long uploadedBytes, long totalBytes) {
+                    //TODO: add listener here
+                }
             });
 
             sendMessage(chatRoom, url.toString());
@@ -67,8 +72,11 @@ public class OperationSetHttpUploadFileTransferJabberImpl
 
         HttpFileUploadManager httpFileUploadManager = jabberProvider.getHttpFileUploadManager();
         httpFileUploadManager.discoverUploadService();
-        URL url = httpFileUploadManager.uploadFile(file, (uploadedBytes, totalBytes) -> {
-        //TODO: add file upload listener here if needed
+        URL url = httpFileUploadManager.uploadFile(file, new UploadProgressListener() {
+            @Override
+            public void onUploadProgress(long uploadedBytes, long totalBytes) {
+                //TODO: add file upload listener here if needed
+            }
         });
         //TODO: return message?
         Message message = imOpSet.createMessage(url.toString());
@@ -87,7 +95,7 @@ public class OperationSetHttpUploadFileTransferJabberImpl
     @Override
     public long getMaximumFileLength() {
         HttpFileUploadManager httpFileUploadManager = HttpFileUploadManager
-            .getInstanceFor(jabberProvider.getConnection());
+            .getInstanceFor((XMPPConnection) jabberProvider.getConnection());
         UploadService defaultUploadService = httpFileUploadManager.getDefaultUploadService();
 
         return defaultUploadService != null && defaultUploadService.hasMaxFileSizeLimit() ? defaultUploadService.getMaxFileSize() : Long.MAX_VALUE;

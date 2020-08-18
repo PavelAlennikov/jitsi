@@ -23,7 +23,6 @@ import net.java.sip.communicator.service.systray.event.*;
 import net.java.sip.communicator.util.Logger;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jitsi.utils.*;
 
 /**
  * An implementation of the <tt>PopupMessageNotificationHandler</tt> interface.

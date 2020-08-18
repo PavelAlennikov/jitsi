@@ -29,7 +29,6 @@ import net.java.sip.communicator.plugin.desktoputil.*;
 import org.jitsi.service.neomedia.*;
 import org.jitsi.service.neomedia.codec.*;
 import org.jitsi.service.resources.*;
-import org.jitsi.utils.*;
 
 /**
  * The encodings configuration panel (used in the account configuration wizards)

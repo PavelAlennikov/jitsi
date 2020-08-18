@@ -17,17 +17,13 @@
  */
 package net.java.sip.communicator.impl.protocol.jabber;
 
-import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.*;
 
 import net.java.sip.communicator.util.Logger;
 
-import org.jitsi.util.*;
-import org.jitsi.utils.*;
 import org.jivesoftware.smack.*;
 import org.jivesoftware.smack.SmackException.*;
-import org.jivesoftware.smack.filter.*;
 import org.jivesoftware.smack.packet.*;
 import org.jivesoftware.smack.roster.*;
 import org.jivesoftware.smackx.disco.packet.*;

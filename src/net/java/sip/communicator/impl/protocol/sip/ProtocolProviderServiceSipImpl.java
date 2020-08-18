@@ -39,7 +39,6 @@ import net.java.sip.communicator.util.*;
 import net.java.sip.communicator.util.Logger;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jitsi.utils.*;
 import org.jitsi.utils.version.Version;
 import org.osgi.framework.*;
 

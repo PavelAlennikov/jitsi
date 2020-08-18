@@ -35,7 +35,6 @@ import net.java.sip.communicator.util.*;
 import net.java.sip.communicator.util.account.*;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jitsi.utils.*;
 
 /**
  * The <tt>GlobalStatusSelectorBox</tt> is a global status selector box, which

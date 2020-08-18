@@ -19,19 +19,16 @@ package net.java.sip.communicator.impl.protocol.sip;
 
 import java.awt.*;
 import java.text.*;
-import java.util.*;
 
 import javax.sip.address.*;
 import javax.sip.header.*;
-import javax.sip.message.*;
 
 import net.java.sip.communicator.service.protocol.*;
 
-import net.java.sip.communicator.service.protocol.event.*;
 import org.jitsi.service.neomedia.*;
+import org.jitsi.service.neomedia.MediaType;
 import org.jitsi.service.neomedia.device.*;
 import org.jitsi.service.neomedia.format.*;
-import org.jitsi.utils.MediaType;
 
 /**
  * Implements all desktop streaming related functions for SIP.

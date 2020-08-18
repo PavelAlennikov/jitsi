@@ -26,7 +26,6 @@ import net.java.sip.communicator.util.*;
 
 import org.jitsi.service.neomedia.*;
 import org.jitsi.service.neomedia.device.*;
-import org.jitsi.utils.*;
 
 /**
  * Implements a button which starts/stops the streaming of the local video in a

@@ -35,8 +35,6 @@ import net.java.sip.communicator.util.Logger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jitsi.service.resources.*;
-import org.jitsi.util.*;
-import org.jitsi.utils.*;
 
 /**
  * Dialog window to add/edit client certificate configuration entries.

@@ -45,7 +45,6 @@ import org.jitsi.service.neomedia.event.*;
 import org.jitsi.service.resources.*;
 import org.jitsi.util.OSUtils;
 import org.jitsi.util.swing.*;
-import org.jitsi.utils.*;
 
 /**
  * Implements <tt>MediaConfigurationService</tt> i.e. represents a factory of

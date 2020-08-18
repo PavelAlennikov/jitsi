@@ -31,7 +31,6 @@ import net.java.sip.communicator.util.skin.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jitsi.service.resources.*;
-import org.jitsi.utils.*;
 
 /**
  * The <tt>SearchTextFieldUI</tt> is the one responsible for the search field

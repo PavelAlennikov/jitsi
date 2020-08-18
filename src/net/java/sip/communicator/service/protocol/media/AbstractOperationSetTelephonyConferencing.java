@@ -26,7 +26,6 @@ import net.java.sip.communicator.util.*;
 
 import org.jitsi.service.neomedia.*;
 import org.jitsi.util.xml.*;
-import org.jitsi.utils.*;
 import org.w3c.dom.*;
 
 /**

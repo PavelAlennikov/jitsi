@@ -29,7 +29,6 @@ import javax.swing.text.*;
 import net.java.sip.communicator.plugin.desktoputil.SwingWorker;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jitsi.utils.*;
 
 import net.java.sip.communicator.plugin.desktoputil.*;
 import net.java.sip.communicator.plugin.desktoputil.presence.avatar.*;

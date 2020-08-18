@@ -47,8 +47,6 @@ import org.jitsi.service.neomedia.codec.*;
 import org.jitsi.service.neomedia.device.*;
 import org.jitsi.service.neomedia.format.*;
 import org.jitsi.service.resources.*;
-import org.jitsi.util.*;
-import org.jitsi.utils.*;
 
 /**
  * The <tt>CallManager</tt> is the one that handles calls. It contains also

@@ -36,9 +36,9 @@ import net.java.sip.communicator.service.protocol.event.*;
 import net.java.sip.communicator.util.*;
 
 import org.jitsi.service.neomedia.device.*;
+import org.jitsi.service.neomedia.MediaType;
 import org.jitsi.service.neomedia.format.*;
 import org.jitsi.util.xml.*;
-import org.jitsi.utils.MediaType;
 import org.w3c.dom.*;
 import org.xml.sax.*;
 
@@ -235,8 +235,7 @@ public class OperationSetDesktopSharingServerSipImpl
         callPeer.addMethodProcessorListener(this);
         callPeer.addCallPeerListener(callPeerListener);
 
-        size = (((VideoMediaFormat)call.getDefaultDevice(MediaType.VIDEO).
-                getFormat()).getSize());
+        size = (((VideoMediaFormat)call.getDefaultDevice(MediaType.VIDEO).getFormat()).getSize());
         origin = getOriginForMediaDevice(device);
         return call;
     }

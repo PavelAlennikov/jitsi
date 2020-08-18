@@ -29,7 +29,6 @@ import javax.swing.event.*;
 import javax.swing.text.*;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jitsi.utils.*;
 
 import net.java.sip.communicator.impl.gui.*;
 import net.java.sip.communicator.impl.gui.main.contactlist.addgroup.*;

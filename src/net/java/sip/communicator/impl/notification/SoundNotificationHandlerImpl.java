@@ -28,7 +28,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.jitsi.service.audionotifier.*;
 import org.jitsi.service.configuration.*;
 import org.jitsi.util.*;
-import org.jitsi.utils.*;
 import org.jitsi.utils.logging.Logger;
 
 /**

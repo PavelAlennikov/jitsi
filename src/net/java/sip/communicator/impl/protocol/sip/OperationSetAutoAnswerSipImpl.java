@@ -33,8 +33,7 @@ import net.java.sip.communicator.util.Logger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jitsi.service.neomedia.*;
-import org.jitsi.utils.*;
-import org.jitsi.utils.MediaType;
+import org.jitsi.service.neomedia.MediaType;
 
 /**
  * An Operation Set defining options to auto answer/forward incoming calls.

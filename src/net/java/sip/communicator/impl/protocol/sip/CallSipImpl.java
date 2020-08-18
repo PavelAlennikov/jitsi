@@ -37,7 +37,7 @@ import net.java.sip.communicator.util.*;
 
 import org.jitsi.service.configuration.*;
 import org.jitsi.service.neomedia.*;
-import org.jitsi.utils.MediaType;
+import org.jitsi.service.neomedia.MediaType;
 
 /**
  * A SIP implementation of the abstract <tt>Call</tt> class encapsulating SIP

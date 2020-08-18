@@ -24,8 +24,6 @@ import net.java.sip.communicator.service.protocol.event.*;
 import net.java.sip.communicator.util.Logger;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jitsi.util.*;
-import org.jitsi.utils.*;
 import org.jitsi.util.xml.*;
 import org.w3c.dom.*;
 

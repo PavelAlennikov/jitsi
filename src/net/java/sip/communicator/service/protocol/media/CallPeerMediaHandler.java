@@ -1603,7 +1603,7 @@ public abstract class CallPeerMediaHandler<T extends MediaAwareCallPeer<?,?,?>>
         // has the correct payload type and ssrc
         RawPacket packet
             = new RawPacket(
-                    HOLE_PUNCH_PACKET, 0, RawPacket.FIXED_HEADER_SIZE);
+                    HOLE_PUNCH_PACKET.clone(), 0, HOLE_PUNCH_PACKET.length);
 
         MediaFormat format = stream.getFormat();
         byte payloadType = format.getRTPPayloadType();

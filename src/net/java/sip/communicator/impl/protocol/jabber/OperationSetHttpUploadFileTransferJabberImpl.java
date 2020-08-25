@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
+
+import net.java.sip.communicator.impl.protocol.jabber.httpupload.*;
 import net.java.sip.communicator.service.protocol.ChatRoom;
 import net.java.sip.communicator.service.protocol.Contact;
 import net.java.sip.communicator.service.protocol.Message;
@@ -12,10 +14,7 @@ import net.java.sip.communicator.service.protocol.OperationSetBasicInstantMessag
 import net.java.sip.communicator.service.protocol.OperationSetHttpUploadFileTransfer;
 import net.java.sip.communicator.service.protocol.event.FileTransferListener;
 import net.java.sip.communicator.util.Logger;
-import org.jivesoftware.smack.SmackException;
-import org.jivesoftware.smack.XMPPException.XMPPErrorException;
-import org.jivesoftware.smackx.httpfileupload.HttpFileUploadManager;
-import org.jivesoftware.smackx.httpfileupload.UploadService;
+import org.jivesoftware.smack.*;
 
 public class OperationSetHttpUploadFileTransferJabberImpl
     implements OperationSetHttpUploadFileTransfer {
@@ -87,7 +86,7 @@ public class OperationSetHttpUploadFileTransferJabberImpl
     @Override
     public long getMaximumFileLength() {
         HttpFileUploadManager httpFileUploadManager = HttpFileUploadManager
-            .getInstanceFor(jabberProvider.getConnection());
+            .getInstanceFor((XMPPConnection) jabberProvider.getConnection());
         UploadService defaultUploadService = httpFileUploadManager.getDefaultUploadService();
 
         return defaultUploadService != null && defaultUploadService.hasMaxFileSizeLimit() ? defaultUploadService.getMaxFileSize() : Long.MAX_VALUE;

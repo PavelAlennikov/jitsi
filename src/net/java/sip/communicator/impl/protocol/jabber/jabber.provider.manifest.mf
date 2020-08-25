@@ -76,5 +76,5 @@ Import-Package: ch.imvs.sdes4j.srtp,
  org.xmlpull.v1,
  org.xmpp.jnodes,
  org.xmpp.jnodes.nio,
- org.xmpp.jnodes.smack,
+ org.xmpp.jnodes.smack
 

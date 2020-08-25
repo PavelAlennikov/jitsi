@@ -1,5 +1,6 @@
 package net.java.sip.communicator.impl.protocol.jabber.httpupload.element;
 
+import net.java.sip.communicator.impl.protocol.jabber.httpupload.*;
 import org.jivesoftware.smack.packet.*;
 
 public class FileTooLargeError implements PacketExtension {
@@ -34,17 +35,19 @@ public class FileTooLargeError implements PacketExtension {
 
     @Override
     public String toXML() {
-        return null;
-    }
+        String xmlNs = this.getNamespace();
+        String elementName = this.getElementName();
 
-//    @Override
-//    public XmlStringBuilder toXML(org.jivesoftware.smack.packet.XmlEnvironment enclosingNamespace) {
-//        XmlStringBuilder xml = new XmlStringBuilder(this);
-//        xml.rightAngleBracket();
-//        xml.element("max-file-size", String.valueOf(maxFileSize));
-//        xml.closeElement(this);
-//        return xml;
-//    }
+        XmlStringBuilder xml = new XmlStringBuilder();
+
+        xml.halfOpenElement(elementName);
+        xml.xmlnsAttribute(xmlNs);
+        xml.rightAngleBracket();
+        xml.element("max-file-size", String.valueOf(maxFileSize));
+        xml.closeElement(elementName);
+
+        return xml.toString();
+    }
 
     public static FileTooLargeError from(IQ iq) {
         XMPPError error = iq.getError();

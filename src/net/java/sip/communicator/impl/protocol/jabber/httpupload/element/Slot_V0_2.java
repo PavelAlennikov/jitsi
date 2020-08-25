@@ -12,18 +12,13 @@ public class Slot_V0_2 extends Slot {
         super(putUrl, getUrl, null, NAMESPACE);
     }
 
-//    @Override
-//    protected IQChildElementXmlStringBuilder getIQChildElementBuilder(IQChildElementXmlStringBuilder xml) {
-//        xml.rightAngleBracket();
-//
-//        xml.element("put", putUrl.toString());
-//        xml.element("get", getUrl.toString());
-//
-//        return xml;
-//    }
-
     @Override
     public String getChildElementXML() {
-        return super.getChildElementXML();
+        XmlStringBuilder xml = new XmlStringBuilder();
+
+        xml.element("put", putUrl.toString());
+        xml.element("get", getUrl.toString());
+
+        return xml.toString();
     }
 }

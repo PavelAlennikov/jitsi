@@ -68,5 +68,14 @@ public class SlotRequest extends IQ {
 
     @Override
     public String getChildElementXML() {
+        XmlStringBuilder xml = new XmlStringBuilder();
+
+        xml.rightAngleBracket();
+        xml.attribute("filename", filename);
+        xml.attribute("size", String.valueOf(size));
+        xml.optAttribute("content-type", contentType);
+        xml.closeEmptyElement();
+
+        return xml.toString();
     }
 }

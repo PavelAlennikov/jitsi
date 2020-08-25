@@ -23,16 +23,15 @@ public class SlotRequest_V0_2 extends SlotRequest {
         super(uploadServiceAddress, filename, size, contentType, NAMESPACE);
     }
 
-//    @Override
-//    protected IQChildElementXmlStringBuilder getIQChildElementBuilder(IQChildElementXmlStringBuilder xml) {
-//        xml.rightAngleBracket();
-//        xml.element("filename", filename);
-//        xml.element("size", String.valueOf(size));
-//        xml.optElement("content-type", contentType);
-//        return xml;
-//    }
-
+    //TODO: check string
     @Override
     public String getChildElementXML() {
+        XmlStringBuilder xml = new XmlStringBuilder();
+
+        xml.element("filename", filename);
+        xml.element("size", String.valueOf(size));
+        xml.optElement("content-type", contentType);
+
+        return xml.toString();
     }
 }

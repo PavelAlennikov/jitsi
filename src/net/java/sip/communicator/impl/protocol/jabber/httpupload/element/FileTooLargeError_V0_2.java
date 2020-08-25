@@ -9,6 +9,4 @@ public class FileTooLargeError_V0_2 extends FileTooLargeError {
     public FileTooLargeError_V0_2(long maxFileSize) {
         super(maxFileSize, NAMESPACE);
     }
-
-
 }

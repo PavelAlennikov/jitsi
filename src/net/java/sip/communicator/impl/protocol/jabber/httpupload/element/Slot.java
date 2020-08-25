@@ -1,5 +1,6 @@
 package net.java.sip.communicator.impl.protocol.jabber.httpupload.element;
 
+import net.java.sip.communicator.impl.protocol.jabber.httpupload.*;
 import org.jivesoftware.smack.packet.*;
 
 import java.net.*;
@@ -50,5 +51,23 @@ public class Slot extends IQ {
 
     @Override
     public String getChildElementXML() {
+        XmlStringBuilder xml = new XmlStringBuilder();
+
+        xml.halfOpenElement("put").attribute("url", putUrl.toString());
+        if (headers.isEmpty()) {
+            xml.closeEmptyElement();
+        } else {
+            xml.rightAngleBracket();
+            for (Map.Entry<String, String> entry : getHeaders().entrySet()) {
+                xml.halfOpenElement("header").attribute("name", entry.getKey()).rightAngleBracket();
+                xml.escape(entry.getValue());
+                xml.closeElement("header");
+            }
+            xml.closeElement("put");
+        }
+
+        xml.halfOpenElement("get").attribute("url", getUrl.toString()).closeEmptyElement();
+
+        return xml.toString();
     }
 }

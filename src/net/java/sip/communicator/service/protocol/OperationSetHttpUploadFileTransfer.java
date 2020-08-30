@@ -4,19 +4,15 @@ import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import net.java.sip.communicator.service.protocol.event.FileTransferListener;
-import org.jivesoftware.smack.SmackException;
-import org.jivesoftware.smack.XMPPException.XMPPErrorException;
+import org.jivesoftware.smack.*;
 
 public interface OperationSetHttpUploadFileTransfer extends OperationSet {
 
-    void sendFile(ChatRoom chatRoom,
-                         File file)
-        throws  IllegalStateException,
-        IllegalArgumentException,
+    void sendFile(ChatRoom chatRoom, File file) throws  IllegalStateException, IllegalArgumentException,
         OperationNotSupportedException;
 
-    void sendFile(Contact toContact, File file) throws GeneralSecurityException, XMPPErrorException, SmackException, InterruptedException, IOException, OperationFailedException;
-
+    void sendFile(Contact toContact, File file) throws GeneralSecurityException, SmackException, InterruptedException,
+            IOException, OperationFailedException, XMPPException;
 
     /**
      * Adds the given <tt>FileTransferListener</tt> that would listen for
@@ -24,7 +20,7 @@ public interface OperationSetHttpUploadFileTransfer extends OperationSet {
      *
      * @param listener the <tt>FileTransferListener</tt> to add
      */
-    public void addFileTransferListener(
+    void addFileTransferListener(
         FileTransferListener listener);
 
     /**
@@ -33,13 +29,13 @@ public interface OperationSetHttpUploadFileTransfer extends OperationSet {
      *
      * @param listener the <tt>FileTransferListener</tt> to remove
      */
-    public void removeFileTransferListener(
+    void removeFileTransferListener(
         FileTransferListener listener);
 
     /**
      * Returns the maximum file length supported by the protocol in bytes.
      * @return the file length that is supported.
      */
-    public long getMaximumFileLength();
+    long getMaximumFileLength();
 
 }

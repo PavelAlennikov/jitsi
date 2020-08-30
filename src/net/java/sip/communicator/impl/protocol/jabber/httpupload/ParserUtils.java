@@ -1,6 +1,5 @@
 package net.java.sip.communicator.impl.protocol.jabber.httpupload;
 
-import org.jitsi.util.*;
 import org.xmlpull.v1.*;
 
 import java.io.*;

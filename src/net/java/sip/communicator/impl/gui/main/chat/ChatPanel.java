@@ -1542,7 +1542,7 @@ public class ChatPanel
         worker.start();
     }
 
-    private void sendFileNoComponent(File file) {
+    private void sendFileNoComponent(final File file) {
         final ChatTransport sendFileTransport
             = this.findHttpUploadFileTransferChatTransport();
 
@@ -1613,7 +1613,12 @@ public class ChatPanel
         // dispatch thread.
         if (!SwingUtilities.isEventDispatchThread())
         {
-            SwingUtilities.invokeLater(() -> sendFile(file));
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    ChatPanel.this.sendFile(file);
+                }
+            });
             return;
         }
 
@@ -2182,7 +2187,12 @@ public class ChatPanel
     {
         if(!SwingUtilities.isEventDispatchThread())
         {
-            SwingUtilities.invokeLater(() -> updateChatTransportStatus(chatTransport));
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    ChatPanel.this.updateChatTransportStatus(chatTransport);
+                }
+            });
             return;
         }
 
@@ -2415,7 +2425,12 @@ public class ChatPanel
     {
         if(!SwingUtilities.isEventDispatchThread())
         {
-            SwingUtilities.invokeLater(() -> updateChatContactStatus(chatContact, statusMessage));
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    ChatPanel.this.updateChatContactStatus(chatContact, statusMessage);
+                }
+            });
             return;
         }
 
@@ -2435,7 +2450,12 @@ public class ChatPanel
     {
         if(!SwingUtilities.isEventDispatchThread())
         {
-            SwingUtilities.invokeLater(() -> setChatSubject(subject));
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    ChatPanel.this.setChatSubject(subject);
+                }
+            });
 
             return;
         }
@@ -2482,8 +2502,13 @@ public class ChatPanel
     {
         if(!SwingUtilities.isEventDispatchThread())
         {
-            SwingUtilities.invokeLater(() -> addIncomingFileTransferRequest(
-                fileTransferOpSet, request, date));
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    ChatPanel.this.addIncomingFileTransferRequest(
+                            fileTransferOpSet, request, date);
+                }
+            });
             return;
         }
 

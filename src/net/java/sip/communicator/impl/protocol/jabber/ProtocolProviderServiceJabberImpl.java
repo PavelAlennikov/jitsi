@@ -38,6 +38,7 @@ import net.java.sip.communicator.impl.protocol.jabber.extensions.jingleinfo.*;
 import net.java.sip.communicator.impl.protocol.jabber.extensions.keepalive.*;
 import net.java.sip.communicator.impl.protocol.jabber.extensions.messagecorrection.*;
 import net.java.sip.communicator.impl.protocol.jabber.extensions.version.*;
+import net.java.sip.communicator.impl.protocol.jabber.httpupload.*;
 import net.java.sip.communicator.service.certificate.*;
 import net.java.sip.communicator.service.dns.*;
 import net.java.sip.communicator.service.protocol.*;
@@ -3022,14 +3023,19 @@ public class ProtocolProviderServiceJabberImpl
     }
 
     public HttpFileUploadManager getHttpFileUploadManager() throws GeneralSecurityException {
-        HttpFileUploadManager httpFileUploadManager = HttpFileUploadManager.getInstanceFor(getConnection());
+        HttpFileUploadManager httpFileUploadManager = HttpFileUploadManager.getInstanceFor((XMPPConnection) getConnection());
 
         CertificateService cvs = getCertificateVerificationService();
 
-        SSLContext sslContext = cvs.getSSLContext(getTrustManager(cvs, getConnection().getServiceName().toString()));
+        SSLContext sslContext = cvs.getSSLContext(getTrustManager(cvs, getConnection().getServiceName()));
         httpFileUploadManager.setTlsContext(sslContext);
 
-        HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
+        HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
+            @Override
+            public boolean verify(String hostname, SSLSession session) {
+                return true;
+            }
+        });
         return httpFileUploadManager;
     }
 }

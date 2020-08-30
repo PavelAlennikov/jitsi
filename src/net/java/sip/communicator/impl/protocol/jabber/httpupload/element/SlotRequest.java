@@ -31,8 +31,6 @@ public class SlotRequest extends IQ {
     protected SlotRequest(String uploadServiceAddress, String filename, long size, String contentType, String namespace) {
         super();
 
-        setDefaultXmlns(namespace);
-
         if (size <= 0) {
             throw new IllegalArgumentException("File fileSize must be greater than zero.");
         }
@@ -57,20 +55,12 @@ public class SlotRequest extends IQ {
         return contentType;
     }
 
-//    @Override
-//    protected IQChildElementXmlStringBuilder getIQChildElementBuilder(IQChildElementXmlStringBuilder xml) {
-//        xml.attribute("filename", filename);
-//        xml.attribute("size", String.valueOf(size));
-//        xml.optAttribute("content-type", contentType);
-//        xml.setEmptyElement();
-//        return xml;
-//    }
-
     @Override
     public String getChildElementXML() {
         XmlStringBuilder xml = new XmlStringBuilder();
 
-        xml.rightAngleBracket();
+        xml.halfOpenElement(ELEMENT);
+        xml.xmlnsAttribute(NAMESPACE);
         xml.attribute("filename", filename);
         xml.attribute("size", String.valueOf(size));
         xml.optAttribute("content-type", contentType);

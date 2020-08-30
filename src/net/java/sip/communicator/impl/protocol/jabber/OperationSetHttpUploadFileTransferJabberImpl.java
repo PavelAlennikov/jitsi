@@ -17,13 +17,13 @@ import net.java.sip.communicator.util.Logger;
 import org.jivesoftware.smack.*;
 
 public class OperationSetHttpUploadFileTransferJabberImpl
-    implements OperationSetHttpUploadFileTransfer {
+        implements OperationSetHttpUploadFileTransfer {
 
     /**
      * This class logger.
      */
     private static final Logger logger
-        = Logger.getLogger(OperationSetMultiUserChatJabberImpl.class);
+            = Logger.getLogger(OperationSetMultiUserChatJabberImpl.class);
 
     /**
      * The currently valid Jabber protocol provider service implementation.
@@ -36,7 +36,7 @@ public class OperationSetHttpUploadFileTransferJabberImpl
      * @param jabberProvider a currently valid instance of ProtocolProviderServiceJabberImpl.
      */
     OperationSetHttpUploadFileTransferJabberImpl(
-        ProtocolProviderServiceJabberImpl jabberProvider) {
+            ProtocolProviderServiceJabberImpl jabberProvider) {
         this.jabberProvider = jabberProvider;
     }
 
@@ -45,29 +45,35 @@ public class OperationSetHttpUploadFileTransferJabberImpl
         try {
             HttpFileUploadManager httpFileUploadManager = jabberProvider.getHttpFileUploadManager();
             httpFileUploadManager.discoverUploadService();
-            URL url = httpFileUploadManager.uploadFile(file, (uploadedBytes, totalBytes) -> {
-                //TODO: add listener here
+            URL url = httpFileUploadManager.uploadFile(file, new UploadProgressListener() {
+                @Override
+                public void onUploadProgress(long uploadedBytes, long totalBytes) {
+                    //TODO: add listener here
+                }
             });
 
             sendMessage(chatRoom, url.toString());
-        } catch (GeneralSecurityException | IOException | InterruptedException | XMPPErrorException | SmackException | OperationFailedException generalSecurityException) {
-            generalSecurityException.printStackTrace();
+        } catch (GeneralSecurityException | IOException | InterruptedException | SmackException
+                | OperationFailedException | XMPPException generalSecurityException) {
+            logger.error(generalSecurityException);
         }
     }
 
     @Override
     public void sendFile(Contact toContact, File file)
-        throws GeneralSecurityException, XMPPErrorException, SmackException, InterruptedException, IOException,
-        OperationFailedException {
+            throws GeneralSecurityException, SmackException, InterruptedException, IOException, XMPPException {
         OperationSetBasicInstantMessaging imOpSet
-            = toContact
-            .getProtocolProvider()
-            .getOperationSet(OperationSetBasicInstantMessaging.class);
+                = toContact
+                .getProtocolProvider()
+                .getOperationSet(OperationSetBasicInstantMessaging.class);
 
         HttpFileUploadManager httpFileUploadManager = jabberProvider.getHttpFileUploadManager();
         httpFileUploadManager.discoverUploadService();
-        URL url = httpFileUploadManager.uploadFile(file, (uploadedBytes, totalBytes) -> {
-        //TODO: add file upload listener here if needed
+        URL url = httpFileUploadManager.uploadFile(file, new UploadProgressListener() {
+            @Override
+            public void onUploadProgress(long uploadedBytes, long totalBytes) {
+                //TODO: add file upload listener here if needed
+            }
         });
         //TODO: return message?
         Message message = imOpSet.createMessage(url.toString());
@@ -86,12 +92,14 @@ public class OperationSetHttpUploadFileTransferJabberImpl
     @Override
     public long getMaximumFileLength() {
         HttpFileUploadManager httpFileUploadManager = HttpFileUploadManager
-            .getInstanceFor((XMPPConnection) jabberProvider.getConnection());
+                .getInstanceFor((XMPPConnection) jabberProvider.getConnection());
         UploadService defaultUploadService = httpFileUploadManager.getDefaultUploadService();
 
-        return defaultUploadService != null && defaultUploadService.hasMaxFileSizeLimit() ? defaultUploadService.getMaxFileSize() : Long.MAX_VALUE;
+        return defaultUploadService != null && defaultUploadService.hasMaxFileSizeLimit()
+                ? defaultUploadService.getMaxFileSize()
+                : Long.MAX_VALUE;
     }
-    
+
     private void sendMessage(ChatRoom chatRoom, String messageText) throws OperationFailedException {
         Message message = chatRoom.createMessage(messageText);
         chatRoom.sendMessage(message);

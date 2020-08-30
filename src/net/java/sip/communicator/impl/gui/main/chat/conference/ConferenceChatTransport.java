@@ -252,8 +252,7 @@ public class ConferenceChatTransport
      * Sending files through a chat room is not yet supported by this chat
      * transport implementation.
      */
-    public FileTransfer sendFile(File file)
-        throws Exception
+    public FileTransfer sendFile(File file) throws Exception
     {
         return null;
     }

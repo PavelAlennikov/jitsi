@@ -34,8 +34,6 @@ public class XMPPConnectionRegistry {
         connectionEstablishedListeners.remove(connectionCreationListener);
     }
 
-
-
     /**
      * Get the collection of listeners that are interested in connection creation events.
      *

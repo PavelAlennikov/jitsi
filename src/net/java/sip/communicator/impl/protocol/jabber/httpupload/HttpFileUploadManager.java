@@ -1,5 +1,6 @@
 package net.java.sip.communicator.impl.protocol.jabber.httpupload;
 
+import net.java.sip.communicator.impl.protocol.jabber.extensions.colibri.*;
 import net.java.sip.communicator.impl.protocol.jabber.httpupload.element.*;
 import net.java.sip.communicator.util.Logger;
 import org.jivesoftware.smack.*;
@@ -53,7 +54,6 @@ public class HttpFileUploadManager extends Manager {
      */
     public static synchronized HttpFileUploadManager getInstanceFor(XMPPConnection connection) {
         HttpFileUploadManager httpFileUploadManager = INSTANCES.get(connection);
-
         if (httpFileUploadManager == null) {
             httpFileUploadManager = new HttpFileUploadManager(connection);
             INSTANCES.put(connection, httpFileUploadManager);
@@ -112,8 +112,7 @@ public class HttpFileUploadManager extends Manager {
         });
     }
 
-    private static UploadService uploadServiceFrom(DiscoverInfo discoverInfo)
-    {
+    private static UploadService uploadServiceFrom(DiscoverInfo discoverInfo) {
         assert containsHttpFileUploadNamespace(discoverInfo);
 
         UploadService.Version version;
@@ -138,23 +137,49 @@ public class HttpFileUploadManager extends Manager {
      * Note that this is a synchronous call -- Smack must wait for the server response.
      *
      * @return true if upload service was discovered
-     * @throws XMPPException     if there was an XMPP error returned.
+     * @throws XMPPException if there was an XMPP error returned.
      */
-    public boolean discoverUploadService() throws XMPPException
-    {
+    public boolean discoverUploadService() throws XMPPException {
         ServiceDiscoveryManager sdm = ServiceDiscoveryManager.getInstanceFor(connection());
+        String serviceName = connection().getServiceName();
 
-        DiscoverInfo httpUploadDiscoverInfo = sdm.discoverInfo(NAMESPACE);
-
-        if (httpUploadDiscoverInfo == null) {
-            httpUploadDiscoverInfo = sdm.discoverInfo(NAMESPACE_0_2);
-            if (httpUploadDiscoverInfo == null) {
-                return false;
+        DiscoverItems discoverItems = null;
+        try {
+            discoverItems = sdm.discoverItems(serviceName);
+        } catch (XMPPException xmppe) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug(
+                        "Failed to discover the items associated with"
+                                + " Jabber entity: " + serviceName,
+                        xmppe);
             }
         }
 
-        defaultUploadService = uploadServiceFrom(httpUploadDiscoverInfo);
-        return true;
+        if (discoverItems != null) {
+            Iterator<DiscoverItems.Item> discoverItemIter = discoverItems.getItems();
+
+            while (discoverItemIter.hasNext()) {
+                DiscoverItems.Item discoverItem = discoverItemIter.next();
+                String entityID = discoverItem.getEntityID();
+                DiscoverInfo discoverInfo = null;
+
+                try {
+                    discoverInfo = sdm.discoverInfo(entityID);
+                } catch (XMPPException xmppe) {
+                    LOGGER.warn(
+                            "Failed to discover information about Jabber"
+                                    + " entity: " + entityID,
+                            xmppe);
+                }
+                if ((discoverInfo != null)
+                        && (discoverInfo.containsFeature(NAMESPACE) || discoverInfo.containsFeature(NAMESPACE_0_2))) {
+                    defaultUploadService = uploadServiceFrom(discoverInfo);
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -162,8 +187,7 @@ public class HttpFileUploadManager extends Manager {
      *
      * @return true if upload service was discovered
      */
-    public boolean isUploadServiceDiscovered()
-    {
+    public boolean isUploadServiceDiscovered() {
         return defaultUploadService != null;
     }
 
@@ -172,8 +196,7 @@ public class HttpFileUploadManager extends Manager {
      *
      * @return upload service JID or null if not available
      */
-    public UploadService getDefaultUploadService()
-    {
+    public UploadService getDefaultUploadService() {
         return defaultUploadService;
     }
 
@@ -185,13 +208,12 @@ public class HttpFileUploadManager extends Manager {
      *
      * @param file file to be uploaded
      * @return public URL for sharing uploaded file
-     * @throws InterruptedException             if the calling thread was interrupted.
-     * @throws XMPPException if there was an XMPP error returned.
-     * @throws SmackException                   if Smack detected an exceptional situation.
-     * @throws IOException                      in case of HTTP upload errors
+     * @throws InterruptedException if the calling thread was interrupted.
+     * @throws XMPPException        if there was an XMPP error returned.
+     * @throws SmackException       if Smack detected an exceptional situation.
+     * @throws IOException          in case of HTTP upload errors
      */
-    public URL uploadFile(File file) throws InterruptedException, XMPPException, SmackException, IOException
-    {
+    public URL uploadFile(File file) throws InterruptedException, XMPPException, SmackException, IOException {
         return uploadFile(file, null);
     }
 
@@ -204,14 +226,13 @@ public class HttpFileUploadManager extends Manager {
      * @param file     file to be uploaded
      * @param listener Upload progress listener or null
      * @return public URL for sharing uploaded file
-     * @throws InterruptedException             if the calling thread was interrupted.
-     * @throws XMPPException if there was an XMPP error returned.
-     * @throws SmackException                   if Smack detected an exceptional situation.
-     * @throws IOException                      if an I/O error occurred.
+     * @throws InterruptedException if the calling thread was interrupted.
+     * @throws XMPPException        if there was an XMPP error returned.
+     * @throws SmackException       if Smack detected an exceptional situation.
+     * @throws IOException          if an I/O error occurred.
      */
     public URL uploadFile(File file, UploadProgressListener listener) throws InterruptedException,
-            XMPPException, SmackException, IOException
-    {
+            XMPPException, SmackException, IOException {
         if (!file.isFile()) {
             throw new FileNotFoundException("The path " + file.getAbsolutePath() + " is not a file");
         }
@@ -233,14 +254,13 @@ public class HttpFileUploadManager extends Manager {
      * @param fileName    Name of the file.
      * @param fileSize    Size of the file.
      * @return public URL for sharing uploaded file
-     * @throws XMPPException   XMPPErrorException if there was an XMPP error returned.
+     * @throws XMPPException        XMPPErrorException if there was an XMPP error returned.
      * @throws InterruptedException If the calling thread was interrupted.
      * @throws SmackException       If Smack detected an exceptional situation.
      * @throws IOException          If an I/O error occurred.
      */
     public URL uploadFile(InputStream inputStream, String fileName, long fileSize)
-            throws XMPPException, InterruptedException, SmackException, IOException
-    {
+            throws XMPPException, InterruptedException, SmackException, IOException {
         return uploadFile(inputStream, fileName, fileSize, null);
     }
 
@@ -255,14 +275,13 @@ public class HttpFileUploadManager extends Manager {
      * @param fileSize    file size in bytes.
      * @param listener    upload progress listener or null.
      * @return public URL for sharing uploaded file
-     * @throws XMPPException   XMPPErrorException if there was an XMPP error returned.
+     * @throws XMPPException        XMPPErrorException if there was an XMPP error returned.
      * @throws InterruptedException If the calling thread was interrupted.
      * @throws SmackException       If Smack detected an exceptional situation.
      * @throws IOException          If an I/O error occurred.
      */
     public URL uploadFile(InputStream inputStream, String fileName, long fileSize, UploadProgressListener listener)
-            throws XMPPException, InterruptedException, SmackException, IOException
-    {
+            throws XMPPException, InterruptedException, SmackException, IOException {
         Objects.requireNonNull(inputStream, "Input Stream cannot be null");
         Objects.requireNonNull(fileName, "Filename Stream cannot be null");
         if (fileSize < 0) {
@@ -280,11 +299,11 @@ public class HttpFileUploadManager extends Manager {
      * @param filename name of file to be uploaded
      * @param fileSize file size in bytes.
      * @return file upload Slot in case of success
-     * @throws IllegalArgumentException         if fileSize is less than or equal to zero or greater than the maximum size
-     *                                          supported by the service.
-     * @throws InterruptedException             if the calling thread was interrupted.
-     * @throws XMPPException if there was an XMPP error returned.
-     * @throws SmackException                   if smack exception.
+     * @throws IllegalArgumentException if fileSize is less than or equal to zero or greater than the maximum size
+     *                                  supported by the service.
+     * @throws InterruptedException     if the calling thread was interrupted.
+     * @throws XMPPException            if there was an XMPP error returned.
+     * @throws SmackException           if smack exception.
      */
     public Slot requestSlot(String filename, long fileSize) throws InterruptedException,
             XMPPException, SmackException {
@@ -324,11 +343,11 @@ public class HttpFileUploadManager extends Manager {
      * @param contentType          file content-type or null
      * @param uploadServiceAddress the address of the upload service to use or null for default one
      * @return file upload Slot in case of success
-     * @throws IllegalArgumentException         if fileSize is less than or equal to zero or greater than the maximum size
-     *                                          supported by the service.
-     * @throws SmackException                   if Smack detected an exceptional situation.
-     * @throws InterruptedException             if the calling thread was interrupted.
-     * @throws XMPPException if there was an XMPP error returned.
+     * @throws IllegalArgumentException if fileSize is less than or equal to zero or greater than the maximum size
+     *                                  supported by the service.
+     * @throws SmackException           if Smack detected an exceptional situation.
+     * @throws InterruptedException     if the calling thread was interrupted.
+     * @throws XMPPException            if there was an XMPP error returned.
      */
     public Slot requestSlot(String filename, long fileSize, String contentType, String uploadServiceAddress)
             throws SmackException, XMPPException {

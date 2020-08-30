@@ -832,9 +832,9 @@ public class ChatWritePanel
         {
             try
             {
-                BufferedImage transferData = (BufferedImage) contents.getTransferData(DataFlavor.imageFlavor);
+                final BufferedImage transferData = (BufferedImage) contents.getTransferData(DataFlavor.imageFlavor);
                 String imageName = "im_" + RandomStringUtils.randomAlphanumeric(5);
-                File tempFile = File.createTempFile(imageName, ".png");
+                final File tempFile = File.createTempFile(imageName, ".png");
                 SwingWorker writeImageThread = new SwingWorker()
                 {
                     @Override

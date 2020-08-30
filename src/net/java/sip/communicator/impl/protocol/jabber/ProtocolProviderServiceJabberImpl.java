@@ -39,6 +39,8 @@ import net.java.sip.communicator.impl.protocol.jabber.extensions.keepalive.*;
 import net.java.sip.communicator.impl.protocol.jabber.extensions.messagecorrection.*;
 import net.java.sip.communicator.impl.protocol.jabber.extensions.version.*;
 import net.java.sip.communicator.impl.protocol.jabber.httpupload.*;
+import net.java.sip.communicator.impl.protocol.jabber.httpupload.element.*;
+import net.java.sip.communicator.impl.protocol.jabber.httpupload.provider.*;
 import net.java.sip.communicator.service.certificate.*;
 import net.java.sip.communicator.service.dns.*;
 import net.java.sip.communicator.service.protocol.*;
@@ -1682,6 +1684,13 @@ public class ProtocolProviderServiceJabberImpl
             addSupportedOperationSet(OperationSetHttpUploadFileTransfer.class,
                                      new OperationSetHttpUploadFileTransferJabberImpl(this));
 
+            ProviderManager providerManager
+                    = ProtocolProviderFactoryJabberImpl.providerManager;
+
+            providerManager.addIQProvider(Slot.ELEMENT,
+                    Slot.NAMESPACE,
+                    new SlotProvider());
+
             addSupportedOperationSet(
                 OperationSetServerStoredContactInfo.class,
                 new OperationSetServerStoredContactInfoJabberImpl(
@@ -1736,9 +1745,6 @@ public class ProtocolProviderServiceJabberImpl
 
             // RTP HDR extension
             supportedFeatures.add(URN_XMPP_JINGLE_RTP_HDREXT);
-
-            ProviderManager providerManager
-                = ProtocolProviderFactoryJabberImpl.providerManager;
 
             //register our jingle provider
             providerManager.addIQProvider( JingleIQ.ELEMENT_NAME,

@@ -20,28 +20,18 @@ abstract class Manager {
     }
 
     /**
-     * Get the XMPPConnection of this Manager if it's authenticated, i.e. logged in. Otherwise throw a {@link NotLoggedInException}.
+     * Get the XMPPConnection of this Manager if it's authenticated, i.e. logged in.
+     * Otherwise throw a {@link SmackException.NotLoggedInException}.
      *
      * @return the XMPPConnection of this Manager.
-     * @throws NotLoggedInException if the connection is not authenticated.
+     * @throws SmackException.NotLoggedInException if the connection is not authenticated.
      */
-    protected final XMPPConnection getAuthenticatedConnectionOrThrow() throws SmackException.NotLoggedInException {
+    protected final XMPPConnection getAuthenticatedConnectionOrThrow() throws SmackException.NotLoggedInException
+    {
         XMPPConnection connection = connection();
         if (!connection.isAuthenticated()) {
             throw new SmackException.NotLoggedInException();
         }
         return connection;
     }
-
-//    protected static final ScheduledAction schedule(Runnable runnable, long delay, TimeUnit unit) {
-//        return schedule(runnable, delay, unit, ScheduledAction.Kind.NonBlocking);
-//    }
-//
-//    protected static final ScheduledAction scheduleBlocking(Runnable runnable, long delay, TimeUnit unit) {
-//        return schedule(runnable, delay, unit, ScheduledAction.Kind.Blocking);
-//    }
-//
-//    protected static final ScheduledAction schedule(Runnable runnable, long delay, TimeUnit unit, ScheduledAction.Kind scheduledActionKind) {
-//        return AbstractXMPPConnection.SMACK_REACTOR.schedule(runnable, delay, unit, scheduledActionKind);
-//    }
 }

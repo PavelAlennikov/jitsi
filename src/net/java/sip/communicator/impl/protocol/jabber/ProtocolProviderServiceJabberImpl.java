@@ -1687,9 +1687,21 @@ public class ProtocolProviderServiceJabberImpl
             ProviderManager providerManager
                     = ProtocolProviderFactoryJabberImpl.providerManager;
 
+            SlotProvider slotProvider = new SlotProvider();
             providerManager.addIQProvider(Slot.ELEMENT,
                     Slot.NAMESPACE,
-                    new SlotProvider());
+                    slotProvider);
+            providerManager.addIQProvider(Slot.ELEMENT,
+                    Slot_V0_2.NAMESPACE,
+                    slotProvider);
+
+            FileTooLargeErrorProvider fileTooLargeErrorProvider = new FileTooLargeErrorProvider();
+            providerManager.addExtensionProvider(FileTooLargeError.ELEMENT,
+                    FileTooLargeError.NAMESPACE,
+                    fileTooLargeErrorProvider);
+            providerManager.addExtensionProvider(FileTooLargeError.ELEMENT,
+                    FileTooLargeError_V0_2.NAMESPACE,
+                    fileTooLargeErrorProvider);
 
             addSupportedOperationSet(
                 OperationSetServerStoredContactInfo.class,

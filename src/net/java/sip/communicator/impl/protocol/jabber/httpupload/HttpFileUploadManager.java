@@ -1,6 +1,5 @@
 package net.java.sip.communicator.impl.protocol.jabber.httpupload;
 
-import net.java.sip.communicator.impl.protocol.jabber.extensions.colibri.*;
 import net.java.sip.communicator.impl.protocol.jabber.httpupload.element.*;
 import net.java.sip.communicator.util.Logger;
 import org.jivesoftware.smack.*;
@@ -94,21 +93,6 @@ public class HttpFileUploadManager extends Manager {
             public void reconnectionFailed(Exception e) {
 
             }
-
-//            @Override
-//            public void authenticated(XMPPConnection connection, boolean resumed) {
-//                 No need to reset the cache if the connection got resumed.
-//                if (resumed) {
-//                    return;
-//                }
-//
-//                try {
-//                    discoverUploadService();
-//                } catch (XMPPException | SmackException.NotConnectedException
-//                        | SmackException.NoResponseException | InterruptedException e) {
-//                    LOGGER.warn("Error during discovering HTTP File Upload service", e);
-//                }
-//            }
         });
     }
 

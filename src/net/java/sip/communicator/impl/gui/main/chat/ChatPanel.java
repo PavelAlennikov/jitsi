@@ -1279,11 +1279,7 @@ public class ChatPanel
      */
     public void paste()
     {
-        JEditorPane editorPane = this.writeMessagePanel.getEditorPane();
-
-        editorPane.paste();
-
-        editorPane.requestFocus();
+        writeMessagePanel.paste();
     }
 
     /**

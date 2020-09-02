@@ -816,18 +816,12 @@ public class ChatWritePanel
                 }
             }
         }
-        else if (e.getKeyCode() == KeyEvent.VK_V) {
-            int i = e.getModifiers();
-            if ((i & InputEvent.CTRL_MASK) == InputEvent.CTRL_MASK) {
-                sendPasteImage(e);
-            }
-        }
     }
 
-    private void sendPasteImage(KeyEvent e)
+    public void paste()
     {
         Clipboard clb = Toolkit.getDefaultToolkit().getSystemClipboard();
-        Transferable contents = clb.getContents(e.getSource());
+        Transferable contents = clb.getContents(this.getEditorPane());
         if (contents != null && contents.isDataFlavorSupported(DataFlavor.imageFlavor))
         {
             try
@@ -861,8 +855,13 @@ public class ChatWritePanel
             }
             catch (UnsupportedFlavorException | IOException unsupportedFlavorException)
             {
-                logger.error(e);
+                logger.error(unsupportedFlavorException);
             }
+        }
+        else
+        {
+            getEditorPane().paste();
+            getEditorPane().requestFocus();
         }
     }
 

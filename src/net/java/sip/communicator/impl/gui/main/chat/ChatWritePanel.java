@@ -823,8 +823,7 @@ public class ChatWritePanel
         Clipboard clb = Toolkit.getDefaultToolkit().getSystemClipboard();
         Transferable contents = clb.getContents(this.getEditorPane());
         if (contents != null && contents.isDataFlavorSupported(DataFlavor.imageFlavor)
-            && !contents.isDataFlavorSupported(DataFlavor.fragmentHtmlFlavor)
-        )
+            && !contents.isDataFlavorSupported(DataFlavor.allHtmlFlavor))
         {
             try
             {

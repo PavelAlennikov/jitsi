@@ -108,49 +108,27 @@ public class ReceiveFileConversationComponent
             = getFileLabel(request.getFileName(), request.getFileSize());
         fileLabel.setText(fileName);
 
-        acceptButton.setVisible(true);
-        acceptButton.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent e)
-            {
-                titleLabel.setText(
-                    dateString
-                    + resources
-                    .getI18NString("service.gui.FILE_TRANSFER_PREPARING",
-                                    new String[]{fileTransferRequest.getSender()
-                                                .getDisplayName()}));
-                acceptButton.setVisible(false);
-                rejectButton.setVisible(false);
-                cancelButton.setVisible(true);
-                progressBar.setVisible(true);
-
-                downloadFile = createFile(fileTransferRequest);
-
-                new AcceptFile(downloadFile).start();
-            }
-        });
-
-        rejectButton.setVisible(true);
-        rejectButton.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent e)
-            {
-                fileTransferRequest.rejectFile();
-
-                acceptButton.setVisible(false);
-                rejectButton.setVisible(false);
-                setWarningStyle(true);
-                fileLabel.setText("");
-                titleLabel.setText(
-                    dateString
-                    + resources.getI18NString(
-                        "service.gui.FILE_TRANSFER_REFUSED"));
-                ReceiveFileConversationComponent.this.chatPanel
-                    .removeActiveFileTransfer(fileTransferRequest.getID());
-            }
-        });
+        this.acceptFileTransfer();
 
         progressBar.setMaximum((int)fileTransferRequest.getFileSize());
+    }
+
+    private void acceptFileTransfer()
+    {
+        titleLabel.setText(
+                dateString
+                        + resources
+                        .getI18NString("service.gui.FILE_TRANSFER_PREPARING",
+                                new String[]{fileTransferRequest.getSender()
+                                        .getDisplayName()}));
+        acceptButton.setVisible(false);
+        rejectButton.setVisible(false);
+        cancelButton.setVisible(true);
+        progressBar.setVisible(true);
+
+        downloadFile = createFile(fileTransferRequest);
+
+        new AcceptFile(downloadFile).start();
     }
 
     /**

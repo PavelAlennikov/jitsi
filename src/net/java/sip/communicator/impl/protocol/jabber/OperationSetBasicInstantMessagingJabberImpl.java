@@ -17,8 +17,11 @@
  */
 package net.java.sip.communicator.impl.protocol.jabber;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 
+import java.util.regex.Pattern;
 import net.java.sip.communicator.impl.protocol.jabber.extensions.carbon.*;
 import net.java.sip.communicator.impl.protocol.jabber.extensions.mailnotification.*;
 import net.java.sip.communicator.impl.protocol.jabber.extensions.messagecorrection.*;
@@ -62,6 +65,8 @@ public class OperationSetBasicInstantMessagingJabberImpl
     private static final String PNAME_MAX_GMAIL_THREADS_PER_NOTIFICATION
         = "net.java.sip.communicator.impl.protocol.jabber."
             +"MAX_GMAIL_THREADS_PER_NOTIFICATION";
+
+    private static final String HTTP_UPLOAD_MESSAGE_PATTERN = "^https://[^/]*:\\d{4,5}/httpfileupload/[^/]*/[^/]*$";
 
     /**
      * A table mapping contact addresses to full jids that can be used to
@@ -923,6 +928,23 @@ public class OperationSetBasicInstantMessagingJabberImpl
             Contact sourceContact
                 = opSetPersPresence.findContactByID(
                     (isPrivateMessaging? userFullId : userBareID));
+
+            Pattern pattern = Pattern.compile(HTTP_UPLOAD_MESSAGE_PATTERN);
+            String content = msg.getBody();
+            if(pattern.matcher(content).matches())
+            {
+                OperationSetFileTransferJabberImpl operationSet = (OperationSetFileTransferJabberImpl) jabberProvider
+                    .getOperationSet(OperationSetFileTransfer.class);
+                try {
+                    URL downloadUrl = new URL(content);
+                    IncomingFileTransferRequestHttpUploadImpl request =
+                        new IncomingFileTransferRequestHttpUploadImpl(sourceContact, downloadUrl);
+                    operationSet.fireFileTransferRequest(new FileTransferRequestEvent(operationSet, request, new Date()));
+                } catch (MalformedURLException e) {
+                    logger.error("Can't create http file transfer download url.", e);
+                }
+            }
+
             if(msg.getType()
                             == org.jivesoftware.smack.packet.Message.Type.error)
             {

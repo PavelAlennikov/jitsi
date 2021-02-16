@@ -66,7 +66,7 @@ public class OperationSetBasicInstantMessagingJabberImpl
         = "net.java.sip.communicator.impl.protocol.jabber."
             +"MAX_GMAIL_THREADS_PER_NOTIFICATION";
 
-    private static final String HTTP_UPLOAD_MESSAGE_PATTERN = "^https://[^/]*:\\d{4,5}/httpfileupload/[^/]*/[^/]*$";
+    private static final Pattern HTTP_UPLOAD_MESSAGE_PATTERN = Pattern.compile("^https://[^/]*:\\d{4,5}/httpfileupload/[^/]*/[^/]*$");
 
     /**
      * A table mapping contact addresses to full jids that can be used to
@@ -928,23 +928,6 @@ public class OperationSetBasicInstantMessagingJabberImpl
             Contact sourceContact
                 = opSetPersPresence.findContactByID(
                     (isPrivateMessaging? userFullId : userBareID));
-
-            Pattern pattern = Pattern.compile(HTTP_UPLOAD_MESSAGE_PATTERN);
-            String content = msg.getBody();
-            if(pattern.matcher(content).matches())
-            {
-                OperationSetFileTransferJabberImpl operationSet = (OperationSetFileTransferJabberImpl) jabberProvider
-                    .getOperationSet(OperationSetFileTransfer.class);
-                try {
-                    URL downloadUrl = new URL(content);
-                    IncomingFileTransferRequestHttpUploadImpl request =
-                        new IncomingFileTransferRequestHttpUploadImpl(sourceContact, downloadUrl);
-                    operationSet.fireFileTransferRequest(new FileTransferRequestEvent(operationSet, request, new Date()));
-                } catch (MalformedURLException e) {
-                    logger.error("Can't create http file transfer download url.", e);
-                }
-            }
-
             if(msg.getType()
                             == org.jivesoftware.smack.packet.Message.Type.error)
             {
@@ -1071,6 +1054,30 @@ public class OperationSetBasicInstantMessagingJabberImpl
             // msgReceivedEvt = messageReceivedTransform(msgReceivedEvt);
             if (msgEvt != null)
                 fireMessageEvent(msgEvt);
+
+            String msgContent = msg.getBody();
+
+            if(HTTP_UPLOAD_MESSAGE_PATTERN.matcher(msgContent).matches())
+            {
+                fireHttpUploadFileTransferRequestEvent(sourceContact, msgContent);
+            }
+        }
+    }
+
+    private void fireHttpUploadFileTransferRequestEvent(Contact sourceContact, String messageContent)
+    {
+        OperationSetFileTransferJabberImpl operationSet = (OperationSetFileTransferJabberImpl) jabberProvider
+            .getOperationSet(OperationSetFileTransfer.class);
+        try
+        {
+            URL downloadUrl = new URL(messageContent);
+            IncomingFileTransferRequestHttpUploadImpl request =
+                new IncomingFileTransferRequestHttpUploadImpl(sourceContact, downloadUrl);
+            operationSet.fireFileTransferRequest(new FileTransferRequestEvent(operationSet, request, new Date()));
+        }
+        catch (MalformedURLException e)
+        {
+            logger.error("Can't create http file transfer download url.", e);
         }
     }
 

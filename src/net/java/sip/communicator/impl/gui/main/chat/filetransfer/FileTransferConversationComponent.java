@@ -464,10 +464,7 @@ public abstract class FileTransferConversationComponent
         {
             try
             {
-                File downloadDir = GuiActivator.getFileAccessService()
-                    .getDefaultDownloadDirectory();
-
-                GuiActivator.getDesktopService().open(downloadDir);
+                GuiActivator.getDesktopService().open(downloadFile.getParentFile());
             }
             catch (IllegalArgumentException e)
             {

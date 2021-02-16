@@ -19,6 +19,8 @@ package net.java.sip.communicator.impl.gui.main.chat.filetransfer;
 
 import java.awt.event.*;
 import java.io.*;
+import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.*;
 
 import javax.swing.*;
@@ -150,6 +152,9 @@ public class ReceiveFileConversationComponent
         {
             downloadDir = GuiActivator.getFileAccessService()
                 .getDefaultDownloadDirectory();
+
+            downloadDir = Paths.get(downloadDir.getAbsolutePath() + File.separator + "Jitsi" + File.separator
+                                      + LocalDate.now()).toFile();
 
             if (!downloadDir.exists())
             {

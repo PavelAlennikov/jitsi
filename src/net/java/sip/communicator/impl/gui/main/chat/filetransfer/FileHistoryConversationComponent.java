@@ -17,9 +17,16 @@
  */
 package net.java.sip.communicator.impl.gui.main.chat.filetransfer;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 
+import net.java.sip.communicator.impl.gui.GuiActivator;
 import net.java.sip.communicator.service.filehistory.*;
+import net.java.sip.communicator.util.Logger;
 
 /**
  * The component used to show a file transfer history record in the chat or
@@ -31,6 +38,8 @@ public class FileHistoryConversationComponent
     extends FileTransferConversationComponent
 {
     private final FileRecord fileRecord;
+    private final Logger logger
+        = Logger.getLogger(FileHistoryConversationComponent.class);
 
     public FileHistoryConversationComponent(FileRecord fileRecord)
     {
@@ -113,13 +122,30 @@ public class FileHistoryConversationComponent
             }
         }
 
-        this.setCompletedDownloadFile(fileRecord.getFile());
-
         Date date = fileRecord.getDate();
+        File file = fileRecord.getFile();
+
+        if (!file.exists()) {
+            try {
+                File downloadDir = GuiActivator.getFileAccessService()
+                    .getDefaultDownloadDirectory();
+
+                LocalDate downloadDate = date.toInstant()
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate();
+
+                file = Paths.get(downloadDir.getAbsolutePath() + File.separator + "Jitsi" + File.separator
+                                            + downloadDate + File.separator + file.getName()).toFile();
+            } catch (IOException e) {
+                logger.error("Can't access default download dir.", e);
+            }
+        }
+
+        this.setCompletedDownloadFile(file);
 
         titleLabel.setText(
             getDateString(date) + titleString);
-        fileLabel.setText(getFileLabel(fileRecord.getFile()));
+        fileLabel.setText(getFileLabel(file));
     }
 
     /**

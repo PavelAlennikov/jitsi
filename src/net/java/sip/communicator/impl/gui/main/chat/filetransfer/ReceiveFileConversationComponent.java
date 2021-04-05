@@ -19,8 +19,6 @@ package net.java.sip.communicator.impl.gui.main.chat.filetransfer;
 
 import java.awt.event.*;
 import java.io.*;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.*;
@@ -146,14 +144,6 @@ public class ReceiveFileConversationComponent
         File downloadDir = null;
 
         String incomingFileName = fileTransferRequest.getFileName();
-
-        try
-        {
-            incomingFileName = URLDecoder.decode(incomingFileName, StandardCharsets.UTF_8.name());
-        } catch (UnsupportedEncodingException e)
-        {
-            logger.error("Can't decode file name from url",  e);
-        }
 
         // strip characters that are invalid on Windows and maybe other
         // platforms too

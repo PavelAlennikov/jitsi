@@ -2,8 +2,11 @@ package net.java.sip.communicator.impl.protocol.jabber;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import net.java.sip.communicator.service.protocol.Contact;
 import net.java.sip.communicator.service.protocol.FileTransfer;
 import net.java.sip.communicator.service.protocol.IncomingFileTransferRequest;
@@ -36,6 +39,14 @@ public class IncomingFileTransferRequestHttpUploadImpl implements IncomingFileTr
         if (fileName == null) {
             String url = downloadUrl.toString();
             fileName = url.substring(url.lastIndexOf("/") + 1);
+
+            try
+            {
+                fileName = URLDecoder.decode(fileName, StandardCharsets.UTF_8.name());
+            } catch (UnsupportedEncodingException e)
+            {
+                logger.error("Can't decode file name from url",  e);
+            }
         }
 
         return fileName;

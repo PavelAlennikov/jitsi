@@ -53,26 +53,6 @@ public class ReplacementConfigPanel
     private JCheckBox enableSmiley;
 
     /**
-     * Checkbox to enable/disable replacements other than smileys.
-     */
-    private JRadioButton enableReplacement;
-
-    /**
-     * Checkbox to enable/disable proposal messages for image/video replacement.
-     */
-    private JRadioButton enableReplacementProposal;
-
-    /**
-     * Checkbox to disable image/video replacement.
-     */
-    private JRadioButton disableReplacement;
-
-    /**
-     * Jtable to list all the available replacement sources.
-     */
-    private JTable table;
-
-    /**
      * Create an instance of Replacement Config
      */
     public ReplacementConfigPanel()
@@ -118,134 +98,6 @@ public class ReplacementConfigPanel
 
         mainPanel.add(Box.createVerticalStrut(10));
 
-        JPanel replacementPanel = new TransparentPanel();
-        replacementPanel.setLayout(new BoxLayout(replacementPanel, BoxLayout.Y_AXIS));
-        replacementPanel.setBorder(
-            BorderFactory.createCompoundBorder(
-                BorderFactory.createTitledBorder(R.getI18NString(
-                    "plugin.chatconfig.replacement.REPLACEMENT_TITLE")),
-                BorderFactory.createEmptyBorder(3, 3, 3, 3)));
-
-        enableReplacement =
-            new SIPCommRadioButton(R.getI18NString(
-                    "plugin.chatconfig.replacement.ENABLE_REPLACEMENT_STATUS"));
-
-        replacementPanel.add(enableReplacement);
-
-        enableReplacement.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent e)
-            {
-                saveData();
-            }
-        });
-
-        enableReplacementProposal =
-            new SIPCommRadioButton(R.getI18NString(
-                    "plugin.chatconfig.replacement.ENABLE_REPLACEMENT_PROPOSAL"
-                ));
-
-        replacementPanel.add(enableReplacementProposal);
-
-        enableReplacementProposal.addActionListener(new ActionListener(){
-
-            public void actionPerformed(ActionEvent arg0)
-            {
-                saveData();
-            }
-        });
-        disableReplacement = new SIPCommRadioButton(R.getI18NString(
-            "plugin.chatconfig.replacement.DISABLE_REPLACEMENT"));
-
-        replacementPanel.add(disableReplacement);
-
-        disableReplacement.addActionListener(new ActionListener(){
-
-            public void actionPerformed(ActionEvent arg0)
-            {
-                saveData();
-            }
-        });
-
-        ButtonGroup replacementGroup = new ButtonGroup();
-        replacementGroup.add(enableReplacement);
-        replacementGroup.add(enableReplacementProposal);
-        replacementGroup.add(disableReplacement);
-
-        // the JTable to list all the available sources
-        table = new JTable();
-        table.setShowGrid(false);
-        table.setTableHeader(null);
-
-        table.setOpaque(true);
-        table.setBackground(Color.white);
-
-        JScrollPane tablePane = new JScrollPane(table);
-        tablePane.setOpaque(false);
-        tablePane.setPreferredSize(
-            new Dimension(replacementPanel.getWidth(), 150));
-        tablePane.setAlignmentX(LEFT_ALIGNMENT);
-
-        JPanel container = new TransparentPanel(new BorderLayout());
-        container.setPreferredSize(
-            new Dimension(replacementPanel.getWidth(), 200));
-        container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
-
-        JLabel label =
-            new JLabel(R.getI18NString(
-                "plugin.chatconfig.replacement.REPLACEMENT_SOURCES"));
-        label.setDisplayedMnemonic(R.getI18nMnemonic(
-                "plugin.chatconfig.replacement.REPLACEMENT_SOURCES"));
-        label.setLabelFor(table);
-
-        container.add(label);
-        container.add(Box.createRigidArea(new Dimension(0, 5)));
-        container.add(tablePane, BorderLayout.EAST);
-
-        /*
-         * list of the source names. Removing 'Smiley' as it shouldn't show up in
-         * the table.
-         */
-        Set<String> keys = ChatConfigActivator.getReplacementSources().keySet();
-        ArrayList<String> sourceList = new ArrayList<String>(keys);
-        sourceList.remove("SMILEY");
-
-        Collections.sort(sourceList);
-
-        table.setModel(new ReplacementConfigurationTableModel(sourceList));
-
-        table.getSelectionModel().addListSelectionListener(
-            new ListSelectionListener()
-            {
-                public void valueChanged(ListSelectionEvent e)
-                {
-                    if (e.getValueIsAdjusting())
-                        return;
-                    if (table.getSelectedRow() != -1)
-                    {
-                        boolean isEnabled =
-                            (Boolean) table.getValueAt(table.getSelectedRow(),
-                                0);
-
-                        if (isEnabled)
-                        {
-                            enableReplacement.setSelected(true);
-                        }
-                    }
-                }
-            });
-
-        TableColumnModel tableColumnModel = table.getColumnModel();
-        TableColumn tableColumn = tableColumnModel.getColumn(0);
-        tableColumn.setMaxWidth(tableColumn.getMinWidth());
-        table.setDefaultRenderer(table.getColumnClass(1),
-            new FixedTableCellRenderer());
-
-        replacementPanel.add(Box.createVerticalStrut(10));
-        replacementPanel.add(container);
-
-        mainPanel.add(replacementPanel);
-
         return mainPanel;
     }
 
@@ -262,20 +114,6 @@ public class ReplacementConfigPanel
                 ReplacementProperty.getPropertyName(
                     ReplacementServiceSmileyImpl.SMILEY_SOURCE),
                 true));
-
-        this.enableReplacement.setSelected(
-            configService.getBoolean(
-                ReplacementProperty.REPLACEMENT_ENABLE, true));
-
-        this.enableReplacementProposal.setSelected(
-            configService.getBoolean(
-                ReplacementProperty.REPLACEMENT_PROPOSAL, true));
-
-        this.disableReplacement.setSelected(
-            !this.enableReplacement.isSelected()
-                && !this.enableReplacementProposal.isSelected());
-
-        this.table.setEnabled(enableReplacement.isSelected());
     }
 
     /**
@@ -290,16 +128,6 @@ public class ReplacementConfigPanel
             .getPropertyName(ReplacementServiceSmileyImpl.SMILEY_SOURCE),
             Boolean.toString(enableSmiley.isSelected()));
 
-        configService.setProperty(ReplacementProperty.REPLACEMENT_ENABLE,
-            Boolean.toString(enableReplacement.isSelected()));
-
-        configService.setProperty(
-            "plugin.chatconfig.replacement.proposal.enable",
-            Boolean.toString(enableReplacementProposal.isSelected()));
-
-        table.getSelectionModel().clearSelection();
-        table.setEnabled(enableReplacement.isSelected()
-            || enableReplacementProposal.isSelected());
     }
 
     /**

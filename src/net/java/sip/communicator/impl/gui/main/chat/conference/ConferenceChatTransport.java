@@ -254,15 +254,10 @@ public class ConferenceChatTransport
      */
     public FileTransfer sendFile(File file) throws Exception
     {
-        return null;
-    }
-
-    @Override
-    public void sendFileViaHttpUpload(File file) throws Exception {
         OperationSetHttpUploadFileTransfer httpFtOpSet = getProtocolProvider()
             .getOperationSet(OperationSetHttpUploadFileTransfer.class);
 
-        httpFtOpSet.sendFile(chatRoom, file);
+        return httpFtOpSet != null ? httpFtOpSet.sendFile(chatRoom, file) : null;
     }
 
     /**

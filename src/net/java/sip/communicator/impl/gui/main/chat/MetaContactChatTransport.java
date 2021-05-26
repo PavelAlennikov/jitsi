@@ -562,14 +562,6 @@ public class MetaContactChatTransport
         return sendFile(file, false);
     }
 
-    @Override
-    public void sendFileViaHttpUpload(File file) throws Exception {
-        OperationSetHttpUploadFileTransfer httpFtOpSet = getProtocolProvider()
-            .getOperationSet(OperationSetHttpUploadFileTransfer.class);
-
-        httpFtOpSet.sendFile(contact, file);
-    }
-
     /**
      * Sends the given file through this chat transport file transfer operation
      * set.
@@ -619,10 +611,23 @@ public class MetaContactChatTransport
         }
         else
         {
+            if (allowsHttpUpload()) {
+                OperationSetHttpUploadFileTransfer httpFtOpSet = getProtocolProvider()
+                    .getOperationSet(OperationSetHttpUploadFileTransfer.class);
+
+                return httpFtOpSet.sendFile(contact, file);
+            }
             OperationSetFileTransfer ftOpSet = protocolProvider
                 .getOperationSet(OperationSetFileTransfer.class);
             return ftOpSet.sendFile(contact, file);
         }
+    }
+
+    private boolean allowsHttpUpload() {
+        OperationSetHttpUploadFileTransfer httpFtOpSet = getProtocolProvider()
+            .getOperationSet(OperationSetHttpUploadFileTransfer.class);
+
+        return httpFtOpSet != null;
     }
 
     /**

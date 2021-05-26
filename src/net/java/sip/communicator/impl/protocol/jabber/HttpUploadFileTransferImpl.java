@@ -13,8 +13,20 @@ public class HttpUploadFileTransferImpl extends AbstractFileTransfer {
     private final File file;
     private long transferredBytes = -1;
 
+    public HttpUploadFileTransferImpl(File file) {
+        this(null, null, file);
+    }
+
+    public HttpUploadFileTransferImpl(Contact contact, File file) {
+        this(null, contact, file);
+    }
+
     public HttpUploadFileTransferImpl(String id, Contact contact, File file) {
-        this.id = id;
+        if (id != null) {
+            this.id = id;
+        } else {
+            this.id = String.valueOf(System.currentTimeMillis()) + hashCode();
+        }
         this.file = file;
         this.contact = contact;
     }

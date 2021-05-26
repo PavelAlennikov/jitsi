@@ -132,9 +132,6 @@ public class IncomingFileTransferRequestHttpUploadImpl implements IncomingFileTr
             {
                 fileTransfer.fireStatusChangeEvent(FileTransferStatusChangeEvent.IN_PROGRESS);
 
-                SSLUtilities.trustAllHostnames();
-                SSLUtilities.trustAllHttpsCertificates();
-
                 try (
                     ReadableByteChannel readableByteChannel = Channels.newChannel(url.openStream());
                     FileOutputStream fileOutputStream = new FileOutputStream(file)

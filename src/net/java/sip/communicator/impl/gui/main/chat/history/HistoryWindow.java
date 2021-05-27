@@ -390,6 +390,10 @@ public class HistoryWindow
         return this;
     }
 
+    public Object getHistoryContact() {
+        return historyContact;
+    }
+
     /**
      * Returns the next date from the history.
      * When <tt>date</tt> is the last one, we return the current date,

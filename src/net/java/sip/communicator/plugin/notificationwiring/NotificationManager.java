@@ -784,6 +784,14 @@ public class NotificationManager
             fileTransferOpSet.addFileTransferListener(this);
         }
 
+        OperationSetHttpUploadFileTransfer operationSetHttpUploadFileTransfer
+            = protocolProvider.getOperationSet(OperationSetHttpUploadFileTransfer.class);
+
+        if (operationSetHttpUploadFileTransfer != null)
+        {
+            operationSetHttpUploadFileTransfer.addFileTransferListener(this);
+        }
+
         OperationSetMultiUserChat multiChatOpSet
             = protocolProvider.getOperationSet(OperationSetMultiUserChat.class);
 
@@ -857,6 +865,14 @@ public class NotificationManager
         if (fileTransferOpSet != null)
         {
             fileTransferOpSet.removeFileTransferListener(this);
+        }
+
+        OperationSetHttpUploadFileTransfer operationSetHttpUploadFileTransfer
+            = protocolProvider.getOperationSet(OperationSetHttpUploadFileTransfer.class);
+
+        if (operationSetHttpUploadFileTransfer != null)
+        {
+            operationSetHttpUploadFileTransfer.removeFileTransferListener(this);
         }
 
         OperationSetMultiUserChat multiChatOpSet

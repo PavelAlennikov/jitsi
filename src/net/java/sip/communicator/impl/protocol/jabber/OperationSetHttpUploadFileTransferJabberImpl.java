@@ -3,10 +3,13 @@ package net.java.sip.communicator.impl.protocol.jabber;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.Vector;
 import net.java.sip.communicator.impl.protocol.jabber.httpupload.HttpFileUploadManager;
 import net.java.sip.communicator.impl.protocol.jabber.httpupload.UploadProgressListener;
 import net.java.sip.communicator.impl.protocol.jabber.httpupload.UploadService;
-import net.java.sip.communicator.service.protocol.AbstractFileTransfer;
 import net.java.sip.communicator.service.protocol.ChatRoom;
 import net.java.sip.communicator.service.protocol.Contact;
 import net.java.sip.communicator.service.protocol.FileTransfer;
@@ -14,6 +17,8 @@ import net.java.sip.communicator.service.protocol.Message;
 import net.java.sip.communicator.service.protocol.OperationFailedException;
 import net.java.sip.communicator.service.protocol.OperationSetBasicInstantMessaging;
 import net.java.sip.communicator.service.protocol.OperationSetHttpUploadFileTransfer;
+import net.java.sip.communicator.service.protocol.event.FileTransferCreatedEvent;
+import net.java.sip.communicator.service.protocol.event.FileTransferListener;
 import net.java.sip.communicator.service.protocol.event.FileTransferStatusChangeEvent;
 import net.java.sip.communicator.util.Logger;
 import org.jivesoftware.smack.SmackException;
@@ -35,18 +40,28 @@ public class OperationSetHttpUploadFileTransferJabberImpl
     private final ProtocolProviderServiceJabberImpl jabberProvider;
 
     /**
+     * A list of listeners registered for file transfer events.
+     */
+    private final Vector<FileTransferListener> fileTransferListeners = new Vector<>();
+
+    /**
      * Instantiates the user operation set with a currently valid instance of the Jabber protocol provider.
      *
      * @param jabberProvider a currently valid instance of ProtocolProviderServiceJabberImpl.
      */
-    OperationSetHttpUploadFileTransferJabberImpl(ProtocolProviderServiceJabberImpl jabberProvider) {
+    OperationSetHttpUploadFileTransferJabberImpl(ProtocolProviderServiceJabberImpl jabberProvider)
+    {
         this.jabberProvider = jabberProvider;
     }
 
     @Override
-    public FileTransfer sendFile(ChatRoom chatRoom, File file) throws Exception {
-        HttpUploadFileTransferImpl httpUploadFileTransfer = new HttpUploadFileTransferImpl(file);
+    public FileTransfer sendFile(ChatRoom chatRoom, File file) throws Exception
+    {
         HttpFileUploadManager httpFileUploadManager = jabberProvider.getHttpFileUploadManager();
+
+        HttpUploadFileTransferImpl httpUploadFileTransfer = new HttpUploadFileTransferImpl(file, FileTransfer.OUT);
+
+        fireFileTransferCreated(new FileTransferCreatedEvent(httpUploadFileTransfer, new Date()));
 
         new ChatRoomFileTransferUploadProgressThread(file, httpUploadFileTransfer, httpFileUploadManager, chatRoom).start();
 
@@ -54,13 +69,33 @@ public class OperationSetHttpUploadFileTransferJabberImpl
     }
 
     @Override
-    public FileTransfer sendFile(Contact toContact, File file) throws Exception {
-        HttpUploadFileTransferImpl httpUploadFileTransfer = new HttpUploadFileTransferImpl(toContact, file);
+    public FileTransfer sendFile(Contact toContact, File file) throws Exception
+    {
         HttpFileUploadManager httpFileUploadManager = jabberProvider.getHttpFileUploadManager();
+
+        HttpUploadFileTransferImpl httpUploadFileTransfer = new HttpUploadFileTransferImpl(toContact, file, FileTransfer.OUT);
+
+        fireFileTransferCreated(new FileTransferCreatedEvent(httpUploadFileTransfer, new Date()));
 
         new FileTransferUploadProgressThread(file, httpUploadFileTransfer, httpFileUploadManager, toContact).start();
 
         return httpUploadFileTransfer;
+    }
+
+    void fireFileTransferCreated(FileTransferCreatedEvent event)
+    {
+        Iterator<FileTransferListener> listeners;
+        synchronized (fileTransferListeners)
+        {
+            listeners = new ArrayList<>(fileTransferListeners).iterator();
+        }
+
+        while (listeners.hasNext())
+        {
+            FileTransferListener listener = listeners.next();
+
+            listener.fileTransferCreated(event);
+        }
     }
 
     @Override
@@ -74,7 +109,29 @@ public class OperationSetHttpUploadFileTransferJabberImpl
             : Long.MAX_VALUE;
     }
 
-    private static class ChatRoomFileTransferUploadProgressThread extends AbstractFileTransferUploadProgressThread {
+    @Override
+    public void addFileTransferListener(FileTransferListener listener)
+    {
+        synchronized(fileTransferListeners)
+        {
+            if(!fileTransferListeners.contains(listener))
+            {
+                this.fileTransferListeners.add(listener);
+            }
+        }
+    }
+
+    @Override
+    public void removeFileTransferListener(FileTransferListener listener)
+    {
+        synchronized(fileTransferListeners)
+        {
+            this.fileTransferListeners.remove(listener);
+        }
+    }
+
+    private static class ChatRoomFileTransferUploadProgressThread extends AbstractFileTransferUploadProgressThread
+    {
 
         private final File file;
         private final HttpUploadFileTransferImpl fileTransfer;
@@ -84,7 +141,8 @@ public class OperationSetHttpUploadFileTransferJabberImpl
         public ChatRoomFileTransferUploadProgressThread(File file,
                                                         HttpUploadFileTransferImpl fileTransfer,
                                                         HttpFileUploadManager httpFileUploadManager,
-                                                        ChatRoom chatRoom) {
+                                                        ChatRoom chatRoom)
+        {
             this.file = file;
             this.fileTransfer = fileTransfer;
             this.httpFileUploadManager = httpFileUploadManager;
@@ -92,8 +150,10 @@ public class OperationSetHttpUploadFileTransferJabberImpl
         }
 
         @Override
-        public void run() {
-            try {
+        public void run()
+        {
+            try
+            {
                 URL url = uploadFile(file, fileTransfer, httpFileUploadManager);
                 sendMessage(chatRoom, url.toString());
             } catch (SmackException | IOException | XMPPException | InterruptedException | OperationFailedException e) {
@@ -102,7 +162,8 @@ public class OperationSetHttpUploadFileTransferJabberImpl
             }
         }
 
-        private void sendMessage(ChatRoom chatRoom, String messageText) throws OperationFailedException {
+        private void sendMessage(ChatRoom chatRoom, String messageText) throws OperationFailedException
+        {
             Message message = chatRoom.createMessage(messageText);
             chatRoom.sendMessage(message);
         }

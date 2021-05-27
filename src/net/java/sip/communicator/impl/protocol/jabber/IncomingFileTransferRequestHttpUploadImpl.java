@@ -89,7 +89,7 @@ public class IncomingFileTransferRequestHttpUploadImpl implements IncomingFileTr
 
     @Override
     public FileTransfer acceptFile(File file) {
-        HttpUploadFileTransferImpl httpUploadFileTransfer = new HttpUploadFileTransferImpl(id, sender, file);
+        HttpUploadFileTransferImpl httpUploadFileTransfer = new HttpUploadFileTransferImpl(id, sender, file, FileTransfer.IN);
 
         new DownloadFileTransferProgressThread(downloadUrl, file, httpUploadFileTransfer).start();
 

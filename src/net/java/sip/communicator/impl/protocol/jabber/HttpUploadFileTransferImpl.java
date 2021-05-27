@@ -3,7 +3,6 @@ package net.java.sip.communicator.impl.protocol.jabber;
 import java.io.File;
 import net.java.sip.communicator.service.protocol.AbstractFileTransfer;
 import net.java.sip.communicator.service.protocol.Contact;
-import net.java.sip.communicator.service.protocol.FileTransfer;
 import net.java.sip.communicator.service.protocol.event.FileTransferStatusChangeEvent;
 
 public class HttpUploadFileTransferImpl extends AbstractFileTransfer {
@@ -11,17 +10,18 @@ public class HttpUploadFileTransferImpl extends AbstractFileTransfer {
     private final String id;
     private final Contact contact;
     private final File file;
+    private final int fileTransferDirection;
     private long transferredBytes = -1;
 
-    public HttpUploadFileTransferImpl(File file) {
-        this(null, null, file);
+    public HttpUploadFileTransferImpl(File file, int fileTransferDirection) {
+        this(null, null, file, fileTransferDirection);
     }
 
-    public HttpUploadFileTransferImpl(Contact contact, File file) {
-        this(null, contact, file);
+    public HttpUploadFileTransferImpl(Contact contact, File file, int fileTransferDirection) {
+        this(null, contact, file, fileTransferDirection);
     }
 
-    public HttpUploadFileTransferImpl(String id, Contact contact, File file) {
+    public HttpUploadFileTransferImpl(String id, Contact contact, File file, int fileTransferDirection) {
         if (id != null) {
             this.id = id;
         } else {
@@ -29,6 +29,7 @@ public class HttpUploadFileTransferImpl extends AbstractFileTransfer {
         }
         this.file = file;
         this.contact = contact;
+        this.fileTransferDirection = fileTransferDirection;
     }
 
     @Override
@@ -43,7 +44,7 @@ public class HttpUploadFileTransferImpl extends AbstractFileTransfer {
 
     @Override
     public int getDirection() {
-        return FileTransfer.OUT;
+        return fileTransferDirection;
     }
 
     @Override

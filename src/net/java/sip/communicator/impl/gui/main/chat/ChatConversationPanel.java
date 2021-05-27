@@ -41,6 +41,7 @@ import net.java.sip.communicator.impl.gui.utils.*;
 import net.java.sip.communicator.impl.gui.utils.Constants;
 import net.java.sip.communicator.plugin.desktoputil.*;
 import net.java.sip.communicator.plugin.desktoputil.SwingWorker;
+import net.java.sip.communicator.service.contactlist.MetaContact;
 import net.java.sip.communicator.service.gui.*;
 import net.java.sip.communicator.service.history.*;
 import net.java.sip.communicator.service.protocol.*;
@@ -2332,7 +2333,7 @@ public class ChatConversationPanel
                         previewDialog.getLinkToReplacement()
                             .put(group, temp);
                     }
-                    else if (isEnabled && isEnabledForSource)
+                    else if (isEnabled && isEnabledForSource && !isPrivateHttpUpload(group))
                     {
                         if (isDirectImage)
                         {
@@ -2379,6 +2380,22 @@ public class ChatConversationPanel
 
             msgBuff.append(StringEscapeUtils.escapeHtml4(plainText
                 .substring(startPos)));
+        }
+
+        private boolean isPrivateHttpUpload(String group)
+        {
+            boolean containsHttpUploadText = group.contains("/httpfileupload/");
+            boolean isPrivate = false;
+
+            if (chatContainer instanceof ChatPanel) {
+                ChatPanel chatPanel = (ChatPanel) chatContainer;
+                isPrivate = chatPanel.getChatSession().getCurrentChatTransport() instanceof MetaContactChatTransport;
+            } else if (chatContainer instanceof HistoryWindow) {
+                HistoryWindow historyWindow = (HistoryWindow) chatContainer;
+                isPrivate = historyWindow.getHistoryContact() instanceof MetaContact;
+            }
+
+            return containsHttpUploadText && isPrivate;
         }
     }
 }

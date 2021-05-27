@@ -718,6 +718,14 @@ public class MainFrame
             fileTransferOpSet.addFileTransferListener(getContactListPanel());
         }
 
+        OperationSetHttpUploadFileTransfer operationSetHttpUploadFileTransfer
+            = protocolProvider.getOperationSet(OperationSetHttpUploadFileTransfer.class);
+
+        if (operationSetHttpUploadFileTransfer != null)
+        {
+            operationSetHttpUploadFileTransfer.addFileTransferListener(getContactListPanel());
+        }
+
         OperationSetMessageWaiting messageWaiting
             = protocolProvider.getOperationSet(OperationSetMessageWaiting.class);
 
@@ -860,6 +868,14 @@ public class MainFrame
         if (fileTransferOpSet != null)
         {
             fileTransferOpSet.removeFileTransferListener(getContactListPanel());
+        }
+
+        OperationSetHttpUploadFileTransfer operationSetHttpUploadFileTransfer
+            = protocolProvider.getOperationSet(OperationSetHttpUploadFileTransfer.class);
+
+        if (operationSetHttpUploadFileTransfer != null)
+        {
+            operationSetHttpUploadFileTransfer.removeFileTransferListener(getContactListPanel());
         }
 
         OperationSetMessageWaiting messageWaiting

@@ -1052,8 +1052,7 @@ public class OperationSetBasicInstantMessagingJabberImpl
             else
                 msgEvt = new MessageDeliveredEvent(newMessage, sourceContact, timestamp);
             // msgReceivedEvt = messageReceivedTransform(msgReceivedEvt);
-            if (msgEvt != null)
-                fireMessageEvent(msgEvt);
+            if (msgEvt != null) fireMessageEvent(msgEvt);
 
             String msgContent = msg.getBody();
 

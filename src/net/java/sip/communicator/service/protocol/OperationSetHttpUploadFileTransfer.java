@@ -15,4 +15,22 @@ public interface OperationSetHttpUploadFileTransfer extends OperationSet {
      */
     long getMaximumFileLength();
 
+    /**
+     * Adds the given <tt>FileTransferListener</tt> that would listen for
+     * file transfer requests and created file transfers.
+     *
+     * @param listener the <tt>FileTransferListener</tt> to add
+     */
+    void addFileTransferListener(
+        FileTransferListener listener);
+
+    /**
+     * Removes the given <tt>FileTransferListener</tt> that listens for
+     * file transfer requests and created file transfers.
+     *
+     * @param listener the <tt>FileTransferListener</tt> to remove
+     */
+    void removeFileTransferListener(
+        FileTransferListener listener);
+
 }

@@ -161,6 +161,19 @@ public class FileHistoryServiceImpl
             if (logger.isTraceEnabled())
                 logger.trace("Service did not have a file transfer op. set.");
         }
+
+        OperationSetHttpUploadFileTransfer operationSetHttpUploadFileTransfer
+            = provider.getOperationSet(OperationSetHttpUploadFileTransfer.class);
+
+        if (operationSetHttpUploadFileTransfer != null)
+        {
+            operationSetHttpUploadFileTransfer.addFileTransferListener(this);
+        }
+        else
+        {
+            if (logger.isTraceEnabled())
+                logger.trace("Service did not have a http upload file transfer op. set.");
+        }
     }
 
     /**
@@ -176,6 +189,14 @@ public class FileHistoryServiceImpl
         if (opSetFileTransfer != null)
         {
             opSetFileTransfer.addFileTransferListener(this);
+        }
+
+        OperationSetHttpUploadFileTransfer operationSetHttpUploadFileTransfer
+            = provider.getOperationSet(OperationSetHttpUploadFileTransfer.class);
+
+        if (operationSetHttpUploadFileTransfer != null)
+        {
+            operationSetHttpUploadFileTransfer.addFileTransferListener(this);
         }
     }
 

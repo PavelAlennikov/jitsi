@@ -928,6 +928,14 @@ public class OperationSetBasicInstantMessagingJabberImpl
             Contact sourceContact
                 = opSetPersPresence.findContactByID(
                     (isPrivateMessaging? userFullId : userBareID));
+
+            String msgContent = msg.getBody();
+
+            if(HTTP_UPLOAD_MESSAGE_PATTERN.matcher(msgContent).matches())
+            {
+                fireHttpUploadFileTransferRequestEvent(sourceContact, msgContent);
+            }
+
             if(msg.getType()
                             == org.jivesoftware.smack.packet.Message.Type.error)
             {
@@ -1053,13 +1061,6 @@ public class OperationSetBasicInstantMessagingJabberImpl
                 msgEvt = new MessageDeliveredEvent(newMessage, sourceContact, timestamp);
             // msgReceivedEvt = messageReceivedTransform(msgReceivedEvt);
             if (msgEvt != null) fireMessageEvent(msgEvt);
-
-            String msgContent = msg.getBody();
-
-            if(HTTP_UPLOAD_MESSAGE_PATTERN.matcher(msgContent).matches())
-            {
-                fireHttpUploadFileTransferRequestEvent(sourceContact, msgContent);
-            }
         }
     }
 

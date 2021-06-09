@@ -1066,13 +1066,13 @@ public class OperationSetBasicInstantMessagingJabberImpl
 
     private void fireHttpUploadFileTransferRequestEvent(Contact sourceContact, String messageContent)
     {
-        OperationSetFileTransferJabberImpl operationSet = (OperationSetFileTransferJabberImpl) jabberProvider
-            .getOperationSet(OperationSetFileTransfer.class);
+        OperationSetHttpUploadFileTransferJabberImpl operationSet = (OperationSetHttpUploadFileTransferJabberImpl) jabberProvider
+            .getOperationSet(OperationSetHttpUploadFileTransfer.class);
         try
         {
             URL downloadUrl = new URL(messageContent);
             IncomingFileTransferRequestHttpUploadImpl request =
-                new IncomingFileTransferRequestHttpUploadImpl(sourceContact, downloadUrl);
+                new IncomingFileTransferRequestHttpUploadImpl(sourceContact, downloadUrl, operationSet);
             operationSet.fireFileTransferRequest(new FileTransferRequestEvent(operationSet, request, new Date()));
         }
         catch (MalformedURLException e)

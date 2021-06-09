@@ -3,6 +3,7 @@ package net.java.sip.communicator.impl.protocol.jabber;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -15,10 +16,12 @@ import net.java.sip.communicator.service.protocol.Contact;
 import net.java.sip.communicator.service.protocol.FileTransfer;
 import net.java.sip.communicator.service.protocol.Message;
 import net.java.sip.communicator.service.protocol.OperationFailedException;
+import net.java.sip.communicator.service.protocol.OperationNotSupportedException;
 import net.java.sip.communicator.service.protocol.OperationSetBasicInstantMessaging;
 import net.java.sip.communicator.service.protocol.OperationSetHttpUploadFileTransfer;
 import net.java.sip.communicator.service.protocol.event.FileTransferCreatedEvent;
 import net.java.sip.communicator.service.protocol.event.FileTransferListener;
+import net.java.sip.communicator.service.protocol.event.FileTransferRequestEvent;
 import net.java.sip.communicator.service.protocol.event.FileTransferStatusChangeEvent;
 import net.java.sip.communicator.util.Logger;
 import org.jivesoftware.smack.SmackException;
@@ -58,9 +61,7 @@ public class OperationSetHttpUploadFileTransferJabberImpl
     public FileTransfer sendFile(ChatRoom chatRoom, File file) throws Exception
     {
         HttpFileUploadManager httpFileUploadManager = jabberProvider.getHttpFileUploadManager();
-
         HttpUploadFileTransferImpl httpUploadFileTransfer = new HttpUploadFileTransferImpl(file, FileTransfer.OUT);
-
         fireFileTransferCreated(new FileTransferCreatedEvent(httpUploadFileTransfer, new Date()));
 
         new ChatRoomFileTransferUploadProgressThread(file, httpUploadFileTransfer, httpFileUploadManager, chatRoom).start();
@@ -69,12 +70,9 @@ public class OperationSetHttpUploadFileTransferJabberImpl
     }
 
     @Override
-    public FileTransfer sendFile(Contact toContact, File file) throws Exception
-    {
+    public FileTransfer sendFile(Contact toContact, File file) throws GeneralSecurityException {
         HttpFileUploadManager httpFileUploadManager = jabberProvider.getHttpFileUploadManager();
-
         HttpUploadFileTransferImpl httpUploadFileTransfer = new HttpUploadFileTransferImpl(toContact, file, FileTransfer.OUT);
-
         fireFileTransferCreated(new FileTransferCreatedEvent(httpUploadFileTransfer, new Date()));
 
         new FileTransferUploadProgressThread(file, httpUploadFileTransfer, httpFileUploadManager, toContact).start();
@@ -82,7 +80,20 @@ public class OperationSetHttpUploadFileTransferJabberImpl
         return httpUploadFileTransfer;
     }
 
-    void fireFileTransferCreated(FileTransferCreatedEvent event)
+    @Override
+    public FileTransfer sendFile(Contact toContact, Contact fromContact, String remotePath, String localPath)
+        throws IllegalStateException, IllegalArgumentException, OperationNotSupportedException {
+
+        throw new OperationNotSupportedException("This operation is not supported");
+    }
+
+    /**
+     * Delivers the file transfer to all registered listeners.
+     *
+     * @param event the <tt>FileTransferEvent</tt> that we'd like delivered to
+     * all registered file transfer listeners.
+     */
+    public void fireFileTransferCreated(FileTransferCreatedEvent event)
     {
         Iterator<FileTransferListener> listeners;
         synchronized (fileTransferListeners)
@@ -95,6 +106,53 @@ public class OperationSetHttpUploadFileTransferJabberImpl
             FileTransferListener listener = listeners.next();
 
             listener.fileTransferCreated(event);
+        }
+    }
+
+    /**
+     * Delivers the specified event to all registered file transfer listeners.
+     *
+     * @param event the <tt>EventObject</tt> that we'd like delivered to all
+     * registered file transfer listeners.
+     */
+    public void fireFileTransferRequestRejected(FileTransferRequestEvent event)
+    {
+        Iterator<FileTransferListener> listeners = null;
+        synchronized (fileTransferListeners)
+        {
+            listeners = new ArrayList<FileTransferListener>
+                (fileTransferListeners).iterator();
+        }
+
+        while (listeners.hasNext())
+        {
+            FileTransferListener listener = listeners.next();
+
+            listener.fileTransferRequestRejected(event);
+        }
+    }
+
+
+    /**
+     * Delivers the specified event to all registered file transfer listeners.
+     *
+     * @param event the <tt>EventObject</tt> that we'd like delivered to all
+     * registered file transfer listeners.
+     */
+    void fireFileTransferRequest(FileTransferRequestEvent event)
+    {
+        Iterator<FileTransferListener> listeners = null;
+        synchronized (fileTransferListeners)
+        {
+            listeners = new ArrayList<FileTransferListener>
+                (fileTransferListeners).iterator();
+        }
+
+        while (listeners.hasNext())
+        {
+            FileTransferListener listener = listeners.next();
+
+            listener.fileTransferRequestReceived(event);
         }
     }
 
@@ -130,7 +188,23 @@ public class OperationSetHttpUploadFileTransferJabberImpl
         }
     }
 
-    private static class ChatRoomFileTransferUploadProgressThread extends AbstractFileTransferUploadProgressThread
+    protected URL uploadFile(File file, final HttpUploadFileTransferImpl fileTransfer,
+                             HttpFileUploadManager httpFileUploadManager)
+        throws XMPPException, SmackException, IOException, InterruptedException {
+        fileTransfer.fireStatusChangeEvent(FileTransferStatusChangeEvent.IN_PROGRESS);
+
+        httpFileUploadManager.discoverUploadService();
+
+        return httpFileUploadManager.uploadFile(file, new UploadProgressListener() {
+            @Override
+            public void onUploadProgress(long uploadedBytes, long totalBytes) {
+                fileTransfer.setTransferredBytes(uploadedBytes);
+                fileTransfer.fireProgressChangeEvent(System.currentTimeMillis(), uploadedBytes);
+            }
+        });
+    }
+
+    private class ChatRoomFileTransferUploadProgressThread extends Thread
     {
 
         private final File file;
@@ -154,9 +228,12 @@ public class OperationSetHttpUploadFileTransferJabberImpl
         {
             try
             {
+                Thread.sleep(15);
+
                 URL url = uploadFile(file, fileTransfer, httpFileUploadManager);
                 sendMessage(chatRoom, url.toString());
-            } catch (SmackException | IOException | XMPPException | InterruptedException | OperationFailedException e) {
+                fileTransfer.fireStatusChangeEvent(FileTransferStatusChangeEvent.COMPLETED);
+            } catch (Exception e) {
                 logger.error("Can't upload file via http", e);
                 fileTransfer.fireStatusChangeEvent(FileTransferStatusChangeEvent.FAILED);
             }
@@ -169,7 +246,7 @@ public class OperationSetHttpUploadFileTransferJabberImpl
         }
     }
 
-    private static class FileTransferUploadProgressThread extends AbstractFileTransferUploadProgressThread {
+    private class FileTransferUploadProgressThread extends Thread {
 
         private final File file;
         private final HttpUploadFileTransferImpl fileTransfer;
@@ -189,9 +266,12 @@ public class OperationSetHttpUploadFileTransferJabberImpl
         @Override
         public void run() {
             try {
+                Thread.sleep(15);
+
                 URL url = uploadFile(file, fileTransfer, httpFileUploadManager);
                 sendMessage(toContact, url.toString());
-            } catch (SmackException | IOException | XMPPException | InterruptedException e) {
+                fileTransfer.fireStatusChangeEvent(FileTransferStatusChangeEvent.COMPLETED);
+            } catch (Exception e) {
                 logger.error("Can't upload file via http", e);
                 fileTransfer.fireStatusChangeEvent(FileTransferStatusChangeEvent.FAILED);
             }
@@ -205,28 +285,6 @@ public class OperationSetHttpUploadFileTransferJabberImpl
 
             Message message = imOpSet.createMessage(url);
             imOpSet.sendInstantMessage(toContact, message);
-        }
-    }
-
-    private abstract static class AbstractFileTransferUploadProgressThread extends Thread {
-
-        protected URL uploadFile(File file, final HttpUploadFileTransferImpl fileTransfer,
-                                 HttpFileUploadManager httpFileUploadManager)
-            throws XMPPException, SmackException, IOException, InterruptedException {
-            fileTransfer.fireStatusChangeEvent(FileTransferStatusChangeEvent.IN_PROGRESS);
-
-            httpFileUploadManager.discoverUploadService();
-
-            URL url = httpFileUploadManager.uploadFile(file, new UploadProgressListener() {
-                @Override
-                public void onUploadProgress(long uploadedBytes, long totalBytes) {
-                    fileTransfer.setTransferredBytes(uploadedBytes);
-                    fileTransfer.fireProgressChangeEvent(System.currentTimeMillis(), uploadedBytes);
-                }
-            });
-            fileTransfer.fireStatusChangeEvent(FileTransferStatusChangeEvent.COMPLETED);
-
-            return url;
         }
     }
 }

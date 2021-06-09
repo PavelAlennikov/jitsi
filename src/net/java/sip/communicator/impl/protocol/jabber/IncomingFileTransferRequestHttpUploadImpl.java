@@ -10,10 +10,13 @@ import java.net.URLDecoder;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import net.java.sip.communicator.service.protocol.AbstractFileTransfer;
 import net.java.sip.communicator.service.protocol.Contact;
 import net.java.sip.communicator.service.protocol.FileTransfer;
 import net.java.sip.communicator.service.protocol.IncomingFileTransferRequest;
+import net.java.sip.communicator.service.protocol.event.FileTransferCreatedEvent;
+import net.java.sip.communicator.service.protocol.event.FileTransferRequestEvent;
 import net.java.sip.communicator.service.protocol.event.FileTransferStatusChangeEvent;
 import net.java.sip.communicator.util.Logger;
 
@@ -25,12 +28,15 @@ public class IncomingFileTransferRequestHttpUploadImpl implements IncomingFileTr
     private final Contact sender;
     private final String id;
     private final URL downloadUrl;
+    private final OperationSetHttpUploadFileTransferJabberImpl fileTransferOpSet;
     private Long fileSize;
     private String fileName;
 
-    public IncomingFileTransferRequestHttpUploadImpl(Contact sender, URL downloadUrl) {
+    public IncomingFileTransferRequestHttpUploadImpl(Contact sender, URL downloadUrl,
+                                                     OperationSetHttpUploadFileTransferJabberImpl fileTransferOpSet) {
         this.downloadUrl = downloadUrl;
         this.sender = sender;
+        this.fileTransferOpSet = fileTransferOpSet;
         this.id = String.valueOf(System.currentTimeMillis()) + hashCode();
     }
 
@@ -90,6 +96,12 @@ public class IncomingFileTransferRequestHttpUploadImpl implements IncomingFileTr
     @Override
     public FileTransfer acceptFile(File file) {
         HttpUploadFileTransferImpl httpUploadFileTransfer = new HttpUploadFileTransferImpl(id, sender, file, FileTransfer.IN);
+        httpUploadFileTransfer.fireStatusChangeEvent(FileTransferStatusChangeEvent.PREPARING);
+
+        FileTransferCreatedEvent event
+            = new FileTransferCreatedEvent(httpUploadFileTransfer, new Date());
+
+        fileTransferOpSet.fireFileTransferCreated(event);
 
         new DownloadFileTransferProgressThread(downloadUrl, file, httpUploadFileTransfer).start();
 
@@ -98,7 +110,8 @@ public class IncomingFileTransferRequestHttpUploadImpl implements IncomingFileTr
 
     @Override
     public void rejectFile() {
-
+        fileTransferOpSet.fireFileTransferRequestRejected(
+            new FileTransferRequestEvent(fileTransferOpSet, this, new Date()));
     }
 
     @Override

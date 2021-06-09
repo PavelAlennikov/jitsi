@@ -19,6 +19,7 @@ package net.java.sip.communicator.service.protocol;
 
 import java.io.*;
 
+import java.security.GeneralSecurityException;
 import net.java.sip.communicator.service.protocol.event.*;
 
 /**
@@ -52,7 +53,8 @@ public interface OperationSetFileTransfer
                                     File file)
         throws  IllegalStateException,
                 IllegalArgumentException,
-                OperationNotSupportedException;
+                OperationNotSupportedException,
+                GeneralSecurityException;
 
     /**
      * Sends a file transfer request to the given <tt>toContact</tt> by
